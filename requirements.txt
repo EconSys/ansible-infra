@@ -1,5 +1,5 @@
 # Core Ansible engine
-ansible-core >= 2.15
+ansible-core >= 2.20
 # Linting / static analysis for Ansible content
 ansible-lint
 # AWS SDK for Python required for amazon.aws and community.aws Ansible modules
