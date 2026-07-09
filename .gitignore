@@ -1,5 +1,5 @@
 # Ansible collections and modules
 /.ansible/
 
-# Python Virtual Environment
-/.*venv/
+# Python Virtual Environment for Ansible project
+/.ansible_venv/
