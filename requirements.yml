@@ -1,5 +1,6 @@
 ---
 # Collections are explicitly sourced from the official Ansible Galaxy
+# https://docs.ansible.com/projects/ansible/latest/collections/index.html
 collections:
   # General systerm utilities, filters, and Jenkins and OpenLDAP integration
   # https://docs.ansible.com/projects/ansible/latest/collections/community/general/index.html#plugins-in-community-general
@@ -19,4 +20,10 @@ collections:
   # https://docs.ansible.com/projects/ansible/latest/collections/community/aws/index.html
   - name: community.aws
     version: ">=11.0.0,<12.0.0"
+    source: https://galaxy.ansible.com
+
+  # File ACL, firewalld, SELinux modules
+  # https://docs.ansible.com/projects/ansible/latest/collections/ansible/posix/index.html#plugins-in-ansible-posix
+  - name: ansible.posix
+    version: ">=2.2.0"
     source: https://galaxy.ansible.com
