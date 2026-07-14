@@ -1,0 +1,47 @@
+---
+- name: Set base domain for build environment
+  hosts: local_host
+  become: true
+  run_once: true
+  gather_facts: false
+
+  tasks:
+    - name: Get the current caller identity
+      amazon.aws.aws_caller_info:
+      register: caller_info
+      # ensure this runs even in check mode
+      check_mode: false
+
+    - name: Validate account ID is present
+      ansible.builtin.fail:
+        msg: >-
+          Could not determine AWS account ID.
+          caller_info: {{ caller_info | to_nice_json }}
+      when:
+        - caller_info is not defined
+        - caller_info.account is not defined
+
+    - name: Set base domain from template
+      ansible.builtin.set_fact:
+        base_domain: "{{ lookup('template', 'templates/base_domain.yml.j2') | trim }}"
+
+    - name: Fail if account ID is not recognized
+      ansible.builtin.fail:
+        msg: >-
+          Unknown AWS account ID: {{ caller_info.account }}.
+      when: base_domain == ''
+
+# debugging stuff here
+    - name: Filter and return only selected data points
+      ansible.builtin.setup:
+        filter:
+          - 'ansible_date_time'
+          - 'ansible_distribution'
+          - 'ansible_fips'
+          - 'ansible_hostname'
+          - 'ansible_os_family'
+          - 'ansible_pkg_mgr'
+
+    - name: Show facts available on the system
+      ansible.builtin.debug:
+        var: ansible_facts
