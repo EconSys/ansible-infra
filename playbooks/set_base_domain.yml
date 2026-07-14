@@ -18,7 +18,6 @@
           Could not determine AWS account ID.
           caller_info: {{ caller_info | to_nice_json }}
       when:
-        - caller_info is not defined
         - caller_info.account is not defined
 
     - name: Set base domain from template
