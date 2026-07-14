@@ -1,4 +1,4 @@
-# Ansible collections and modules
+# Ansible collections, modules, and logging
 /.ansible/
 
 # Python Virtual Environment for Ansible project
