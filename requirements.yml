@@ -2,7 +2,7 @@
 # Collections are explicitly sourced from the official Ansible Galaxy
 # https://docs.ansible.com/projects/ansible/latest/collections/index.html
 collections:
-  # General systerm utilities, filters, and Jenkins and OpenLDAP integration
+  # General system utilities, filters, and Jenkins and OpenLDAP integration
   # https://docs.ansible.com/projects/ansible/latest/collections/community/general/index.html#plugins-in-community-general
   - name: community.general
     version: ">=13.0.0,<13.1.0"
