@@ -1,0 +1,114 @@
+- name: Check if AWS CLI v2 binary exists
+  ansible.builtin.stat:
+    path: "{{ aws_cli_exec_path }}"
+  register: aws_cli_binary
+  tags:
+    - aws
+
+- name: Download AWS CLI v2 installer zip file
+  ansible.builtin.get_url:
+    url: "{{ aws_cli_installer_url }}"
+    dest: "/tmp/{{ aws_cli_installer }}.zip"
+    owner: root
+    group: root
+    mode: "0644"
+  when: not aws_cli_binary.stat.exists
+  register: aws_cli_download
+  tags:
+    - aws
+
+- name: Download AWS CLI v2 installer signature file
+  ansible.builtin.get_url:
+    url: "{{ aws_cli_installer_url }}.sig"
+    dest: "/tmp/{{ aws_cli_installer }}.sig"
+    owner: root
+    group: root
+    mode: "0644"
+  when: not aws_cli_binary.stat.exists
+  tags:
+    - aws
+    - package_verification
+
+- name: Copy AWS CLI v2 public key to remote
+  ansible.builtin.copy:
+    src: "{{ aws_cli_gpg_key }}"
+    dest: "/tmp/{{ aws_cli_gpg_key }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: not aws_cli_binary.stat.exists
+  tags:
+    - aws
+    - package_verification
+
+- name: Import AWS CLI v2 public key
+  ansible.builtin.command:
+    cmd: >
+      gpg --import /tmp/{{ aws_cli_gpg_key }}
+  when: not aws_cli_binary.stat.exists
+  changed_when: false
+  tags:
+    - aws
+    - package_verification
+
+- name: Verify AWS CLI v2 installer zip file against signature
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --verify
+      - /tmp/{{ aws_cli_installer }}.sig
+      - /tmp/{{ aws_cli_installer }}.zip
+  when: not aws_cli_binary.stat.exists
+  register: aws_cli_gpg_verify
+  changed_when: false
+  failed_when: aws_cli_gpg_verify.rc != 0
+  tags:
+    - aws
+    - package_verification
+
+- name: Assert package verification succeeded
+  ansible.builtin.assert:
+    that:
+      - aws_cli_gpg_verify.rc == 0
+    fail_msg: >-
+      AWS CLI v2 installer signature verification failed.
+      Installer: /tmp/{{ aws_cli_installer }}.zip
+      Signature: /tmp/{{ aws_cli_installer }}.sig
+      GPG output: {{ aws_cli_gpg_verify.stderr | default('N/A') }}
+    success_msg: "AWS CLI v2 installer signature verified successfully."
+  when: not aws_cli_binary.stat.exists
+  tags:
+    - aws
+    - package_verification
+
+- name: Unzip AWS CLI v2 installer
+  ansible.builtin.unarchive:
+    src: "{{ aws_cli_zip_path }}"
+    dest: /tmp
+    remote_src: true
+  when:
+    - not aws_cli_binary.stat.exists
+    - aws_cli_gpg_verify.rc == 0
+  tags:
+    - aws
+
+- name: Install AWS CLI v2
+  ansible.builtin.command:
+    cmd: /tmp/aws/install
+  args:
+    creates: "{{ aws_cli_exec_path }}"
+  when:
+    - not aws_cli_binary.stat.exists
+    - aws_cli_gpg_verify.rc == 0
+  tags:
+    - aws
+    - base_packages
+
+- name: Ensure aws symlink is present, always
+  ansible.builtin.file:
+    src: "{{ aws_cli_exec_path }}"
+    dest: /usr/bin/aws
+    state: link
+    force: true
+  tags:
+    - aws

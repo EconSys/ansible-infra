@@ -1,0 +1,75 @@
+- name: Download SSM Agent RPM
+  ansible.builtin.get_url:
+    url: "{{ aws_ssm_agent_download_url }}"
+    dest: "/tmp/{{ aws_ssm_agent_package }}"
+    owner: root
+    group: root
+    mode: "0644"
+  tags:
+    - aws
+
+- name: Download SSM Agent signature
+  ansible.builtin.get_url:
+    url: "{{ aws_ssm_agent_download_url }}.sig"
+    dest: "/tmp/{{ aws_ssm_agent_package }}.sig"
+    owner: root
+    group: root
+    mode: "0644"
+  tags:
+    - aws
+    - package_verification
+
+- name: Copy AWS SSM Agent public key to remote
+  ansible.builtin.copy:
+    src: "{{ aws_ssm_agent_gpg_key }}"
+    dest: "/tmp/{{ aws_ssm_agent_gpg_key }}"
+    owner: root
+    group: root
+    mode: "0644"
+  tags:
+    - aws
+    - package_verification
+
+- name: Import AWS SSM Agent public key into RPM keyring
+  ansible.builtin.rpm_key:
+    state: present
+    key: "/tmp/{{ aws_ssm_agent_gpg_key }}"
+  tags:
+    - aws
+    - package_verification
+
+- name: Verify SSM Agent RPM signature with RPM
+  ansible.builtin.command:
+    argv:
+      - rpm
+      - --checksig
+      - /tmp/{{ aws_ssm_agent_package }}
+  register: aws_ssm_agent_rpm_verify
+  changed_when: false
+  failed_when: aws_ssm_agent_rpm_verify.rc != 0
+  tags:
+    - aws
+    - package_verification
+
+- name: Assert package verification succeeded
+  ansible.builtin.assert:
+    that:
+      - aws_ssm_agent_rpm_verify.rc == 0
+    fail_msg: >-
+      AWS SSM Agent RPM signature verification failed.
+      RPM package: /tmp/{{ aws_ssm_agent_package }}
+      RPM output: {{ aws_ssm_agent_rpm_verify.stderr | default('N/A') }}
+    success_msg: "AWS SSM Agent RPM verified successfully."
+  tags:
+    - aws
+    - package_verification
+
+- name: Install SSM Agent
+  ansible.builtin.dnf:
+    name: "/tmp/{{ aws_ssm_agent_package }}"
+    state: present
+    disable_gpg_check: false
+  when: aws_ssm_agent_rpm_verify.rc == 0
+  tags:
+    - aws
+    - base_packages
