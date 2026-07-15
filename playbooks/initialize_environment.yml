@@ -24,22 +24,49 @@
       ansible.builtin.setup:
         filter:
           - ansible_architecture
-          # - ansible_distribution
+          - ansible_date_time
+          - ansible_distribution
           - ansible_distribution_major_version
-          # - ansible_fips
+          - ansible_interfaces
+          - ansible_fips
+          - ansible_os_family
+          - ansible_python_version
+          - ansible_selinux
+          - ansible_system
+
+    - name: Show OS facts {{ ansible_date_time.dat }}
+      ansible.builtin.debug:
+        msg:
+          - "Distro: {{ ansible_distribution }} version: {{ ansible_distribution_major_version }}"
+          - "Python version: {{ ansible_python_version }}"
+          - "OS family: {{ ansible_os_family }}"
+          - "System: {{ ansible_system }}"
+          - "Architecture: {{ ansible_architecture }}"
+          - "FIPS boolean: {{ ansible_fips }}"
+          - "SELinux status: {{ ansible_selinux.status }}"
+          - "Ansible default IPV4: {{ ansible_default_ipv4.address }} {{ ansible_default_ipv4.interface }}"
 
     - name: Set normalized build architecture
       ansible.builtin.set_fact:
         os_arch: >-
           {{
             {
-              'x86_64': 'linux_amd64'
+              'x86_64': 'linux_amd64',
+              'aarch64': 'linux_arm64'
             }[ansible_architecture]
           }}
+
+    - name: Show os_arch variable
+      ansible.builtin.debug:
+        var: os_arch
 
     - name: Set RHEL major version
       ansible.builtin.set_fact:
         rhel_version: "{{ ansible_distribution_major_version }}"
+
+    - name: Show rhel_version variable
+      ansible.builtin.debug:
+        var: rhel_version
 
     # https://docs.ansible.com/projects/ansible/latest/collections/amazon/aws/ec2_metadata_facts_module.html
     - name: Gather EC2 metadata facts
@@ -49,16 +76,20 @@
       ansible.builtin.set_fact:
         aws_region: "{{ ansible_ec2_placement_region }}"
 
+    - name: Show aws_region variable
+      ansible.builtin.debug:
+        var: aws_region
+
     - name: Set base domain
       ansible.builtin.set_fact:
         base_domain: "{{ lookup('template', 'templates/base_domain.yml.j2') | trim }}"
+
+    - name: Show base_domain variable
+      ansible.builtin.debug:
+        var: base_domain
 
     - name: Fail if account ID is not recognized
       ansible.builtin.fail:
         msg: >-
           Unknown AWS account ID: {{ caller_info.account }}.
       when: base_domain == ''
-
-    - name: Show gathered facts
-      ansible.builtin.debug:
-        var: ansible_facts
