@@ -1,0 +1,25 @@
+---
+- name: Install required packages for base AMI
+  hosts: local_host
+  become: true
+
+  tasks:
+    - name: Install base packages
+      ansible.builtin.import_role:
+        name: base_packages
+        tasks_from: install_base_packages
+
+    - name: Install AWS CLI v2
+      ansible.builtin.import_role:
+        name: aws
+        tasks_from: install_aws_cli
+
+    - name: Install SSM Agent
+      ansible.builtin.import_role:
+        name: aws
+        tasks_from: install_ssm_agent
+
+    - name: Generate RPM manifest
+      ansible.builtin.import_role:
+        name: base_packages
+        tasks_from: generate_rpm_manifest
