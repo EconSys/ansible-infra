@@ -1,0 +1,64 @@
+---
+- name: Initialize environment
+  hosts: local_host
+  become: true
+  run_once: true
+  gather_facts: false
+
+  tasks:
+    - name: Get the current caller identity
+      amazon.aws.aws_caller_info:
+      register: caller_info
+      # ensure this runs even in check mode
+      check_mode: false
+
+    - name: Validate account ID is present
+      ansible.builtin.fail:
+        msg: >-
+          Could not determine AWS account ID.
+          caller_info: {{ caller_info | to_nice_json }}
+      when:
+        - caller_info.account is not defined
+
+    - name: Gather Ansible facts
+      ansible.builtin.setup:
+        filter:
+          - ansible_architecture
+          # - ansible_distribution
+          - ansible_distribution_major_version
+          # - ansible_fips
+
+    - name: Set normalized build architecture
+      ansible.builtin.set_fact:
+        os_arch: >-
+          {{
+            {
+              'x86_64': 'linux_amd64'
+            }[ansible_architecture]
+          }}
+
+    - name: Set RHEL major version
+      ansible.builtin.set_fact:
+        rhel_version: "{{ ansible_distribution_major_version }}"
+
+    # https://docs.ansible.com/projects/ansible/latest/collections/amazon/aws/ec2_metadata_facts_module.html
+    - name: Gather EC2 metadata facts
+      amazon.aws.ec2_metadata_facts:
+
+    - name: Set AWS region
+      ansible.builtin.set_fact:
+        aws_region: "{{ ansible_ec2_placement_region }}"
+
+    - name: Set base domain
+      ansible.builtin.set_fact:
+        base_domain: "{{ lookup('template', 'templates/base_domain.yml.j2') | trim }}"
+
+    - name: Fail if account ID is not recognized
+      ansible.builtin.fail:
+        msg: >-
+          Unknown AWS account ID: {{ caller_info.account }}.
+      when: base_domain == ''
+
+    - name: Show gathered facts
+      ansible.builtin.debug:
+        var: ansible_facts
