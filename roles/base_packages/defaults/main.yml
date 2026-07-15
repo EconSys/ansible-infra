@@ -1,0 +1,68 @@
+---
+# ============================================================================
+# Repository
+# ============================================================================
+
+# DNF auto-expands $releasever (Release version) and $basearch (Base architecture) at runtime.
+# DO NOT hardcode - breaks code portability for future RHEL versions.
+base_packages_epel_gpg_key_url: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-$releasever
+base_packages_epel_repo_url: https://mirrors.fedoraproject.org/metalink?repo=epel-$releasever&arch=$basearch
+
+base_packages_corretto_repo_url: https://yum.corretto.aws/corretto
+
+base_packages_codeready_builder_repo: "codeready-builder-for-rhel-{{ rhel_version }}-rhui-rpms"
+base_packages_appstream_repo: "rhel-{{ rhel_version }}-appstream-rhui-rpms"
+base_packages_baseos_repo: "rhel-{{ rhel_version }}-baseos-rhui-rpms"
+
+# ============================================================================
+# Packages
+# ============================================================================
+base_packages_build_tools:
+  - git
+  - make
+  - tar
+  - wget
+  - zip
+
+base_packages_system:
+  - bind-utils
+  - dnf-plugin-versionlock
+  - dnf-plugins-core
+  - dnf-utils
+  - dosfstools
+  - dracut-fips
+  - htop
+  - jq
+  - lvm2
+  - patch
+  - policycoreutils-devel
+  - postfix
+  - rpcbind
+  - tree
+  - setools-console
+
+base_packages_networking:
+  - firewalld
+  - net-tools
+  - NetworkManager-cloud-setup
+  - openssl-libs
+  - openssl-devel
+  - openssl-perl
+  - stunnel
+
+base_packages_authentication:
+  - authselect
+  - oddjob-mkhomedir
+  - openldap-clients
+  - sssd
+  - sssd-ldap
+
+base_packages_jdk_version: 21
+base_packages_java:
+  - "java-{{ base_packages_jdk_version }}-amazon-corretto-devel"
+
+# ============================================================================
+# output RPM manifest for base image
+# ============================================================================
+base_packages_manifest_dir: "/var/log/ansible"
+base_packages_manifest_file: "{{ base_packages_manifest_dir }}/installed_packages_manifest.txt"

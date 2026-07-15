@@ -1,0 +1,174 @@
+---
+# RHEL Packer AMI - Base Package Installation
+
+# ============================================================================
+# SYSTEM UPDATE
+# ============================================================================
+- name: Ensure package cache and packages are up-to-date
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+    update_cache: true
+    only_upgrade: true
+  tags:
+    - base_packages
+    - system_update
+
+# ============================================================================
+# EPEL REPOSITORY SETUP
+# repository for 3rd-party extra packages
+# ============================================================================
+# many EPEL packages rely on CodeReady Builder libraries
+# so we need to enable CodeReady Builder, first
+- name: Enable CodeReady Builder repository
+  community.general.dnf_config_manager:
+    name: "{{ base_packages_codeready_builder_repo }}"
+    state: enabled
+  tags:
+    - base_packages
+    - epel
+    - repositories
+
+- name: Import EPEL GPG key for package verification
+  ansible.builtin.rpm_key:
+    state: present
+    key: "{{ base_packages_epel_gpg_key_url }}"
+  tags:
+    - base_packages
+    - epel
+    - package_verification
+    - repositories
+
+- name: Add EPEL repository, enable, and ensure package verification
+  ansible.builtin.yum_repository:
+    name: epel
+    description: Extra Packages for Enterprise Linux $releasever
+    state: present
+    enabled: true
+    metalink: "{{ base_packages_epel_repo_url }}"
+    gpgcheck: true
+    gpgkey: "{{ base_packages_epel_gpg_key_url }}"
+  tags:
+    - base_packages
+    - epel
+    - package_verification
+    - repositories
+
+# ============================================================================
+# BUILD TOOLS
+# ============================================================================
+- name: Install build tools
+  ansible.builtin.dnf:
+    name: "{{ base_packages_build_tools }}"
+    state: present
+    disable_gpg_check: false
+    disablerepo: "*"
+    enablerepo:
+      - "{{ base_packages_appstream_repo }}"
+      - "{{ base_packages_baseos_repo }}"
+  tags:
+    - base_packages
+    - build_tools
+
+# ============================================================================
+# BASE SYSTEM PACKAGES
+# ============================================================================
+- name: Install required base system packages
+  ansible.builtin.dnf:
+    name: "{{ base_packages_system }}"
+    state: present
+    disable_gpg_check: false
+    disablerepo: "*"
+    enablerepo:
+      - epel
+      - "{{ base_packages_appstream_repo }}"
+      - "{{ base_packages_baseos_repo }}"
+  tags:
+    - base_packages
+    - system_packages
+
+# ============================================================================
+# NETWORKING PACKAGES
+# ============================================================================
+- name: Install networking packages
+  ansible.builtin.dnf:
+    name: "{{ base_packages_networking }}"
+    state: present
+    disable_gpg_check: false
+    disablerepo: "*"
+    enablerepo:
+      - "{{ base_packages_appstream_repo }}"
+      - "{{ base_packages_baseos_repo }}"
+  tags:
+    - base_packages
+    - networking
+
+# Cloud providers are disabled by default; must be explicitly enabled
+- name: Enable AWS in NetworkManager-cloud-setup drop-in
+  ansible.builtin.template:
+    src: enable_aws_ec2.conf.j2
+    dest: /etc/systemd/system/nm-cloud-setup.service.d/enable_aws_ec2.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Reload systemd
+    - Start nm-cloud-setup service and ensure enabled at boot
+    - Start nm-cloud-setup timer and ensure enabled at boot
+  tags:
+    - aws
+    - networking
+    - systemd
+
+# ============================================================================
+# AUTHENTICATION LAYER PACKAGES
+# ============================================================================
+- name: Install authentication layer packages
+  ansible.builtin.dnf:
+    name: "{{ base_packages_authentication }}"
+    state: present
+    disable_gpg_check: false
+    disablerepo: "*"
+    enablerepo:
+      - "{{ base_packages_appstream_repo }}"
+      - "{{ base_packages_baseos_repo }}"
+  tags:
+    - authentication
+    - base_packages
+
+# ============================================================================
+# JAVA
+# ============================================================================
+- name: Import Amazon Corretto GPG key for package verification
+  ansible.builtin.rpm_key:
+    state: present
+    key: "{{ base_packages_corretto_repo_url }}.key"
+  tags:
+    - java
+    - package_verification
+
+- name: Add Amazon Corretto repository and ensure package verification
+  ansible.builtin.yum_repository:
+    name: AmazonCorretto
+    description: Amazon Corretto Repository
+    state: present
+    enabled: true
+    baseurl: "{{ base_packages_corretto_repo_url }}"
+    gpgcheck: true
+    gpgkey: "{{ base_packages_corretto_repo_url }}.key"
+  tags:
+    - java
+    - package_verification
+    - repositories
+
+- name: Install Java and ensure GPG package verification
+  ansible.builtin.dnf:
+    name: "{{ base_packages_java }}"
+    state: present
+    disable_gpg_check: false
+    disablerepo: "*"
+    enablerepo: AmazonCorretto
+  tags:
+    - base_packages
+    - java
+    - package_verification

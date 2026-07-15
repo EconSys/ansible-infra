@@ -1,0 +1,30 @@
+- name: Reload systemd
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+  tags:
+    - systemd
+
+- name: Start nm-cloud-setup service and ensure enabled at boot
+  ansible.builtin.systemd_service:
+    name: nm-cloud-setup.service
+    state: started
+    enabled: true
+  tags:
+    - aws
+    - base_packages
+    - networking
+    - nm-cloud-setup
+    - service
+    - systemd
+
+- name: Start nm-cloud-setup timer and ensure enabled at boot
+  ansible.builtin.systemd_service:
+    name: nm-cloud-setup.timer
+    state: started
+    enabled: true
+  tags:
+    - base_packages
+    - networking
+    - nm-cloud-setup
+    - systemd
+    - chron
