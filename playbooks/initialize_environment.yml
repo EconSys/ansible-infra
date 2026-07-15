@@ -33,10 +33,12 @@
           - ansible_python_version
           - ansible_selinux
           - ansible_system
+          - ansible_user_id
 
     - name: Show OS facts {{ ansible_date_time.dat }}
       ansible.builtin.debug:
         msg:
+          - "Ansible user: {{ ansible_user_id }}"
           - "Distro: {{ ansible_distribution }} version: {{ ansible_distribution_major_version }}"
           - "Python version: {{ ansible_python_version }}"
           - "OS family: {{ ansible_os_family }}"
