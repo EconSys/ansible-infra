@@ -1,5 +1,9 @@
 #! /usr/bin/env bash
 set -euo pipefail
+if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+  logger -t "You are not running as the root user.  Please try again with root privileges."
+  exit 1
+fi
 
 # create/reuse Ansible environment; protect against breaking package dependencies
 VENV_DIR=".ansible_venv"
@@ -27,4 +31,5 @@ python3 -m pip list
 ansible-galaxy collection install -r requirements.yml
 
 # add Ansible logging directory for current project
-install -m 0750 -d ./.ansible/logs
+install -o root -g root -m 0750 -d ./.ansible/logs
+install -o root -g root -m 0640 /dev/null ./.ansible/logs/ansible.log
