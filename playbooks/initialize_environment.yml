@@ -35,9 +35,10 @@
           - ansible_system
           - ansible_user_id
 
-    - name: Show OS facts {{ ansible_date_time.dat }}
+    - name: Show OS facts
       ansible.builtin.debug:
         msg:
+          - "Date and time: {{ ansible_date_time.dat }}"
           - "Ansible user: {{ ansible_user_id }}"
           - "Distro: {{ ansible_distribution }} version: {{ ansible_distribution_major_version }}"
           - "Python version: {{ ansible_python_version }}"
@@ -61,14 +62,6 @@
     - name: Show os_arch variable
       ansible.builtin.debug:
         var: os_arch
-
-    - name: Set RHEL major version
-      ansible.builtin.set_fact:
-        rhel_version: "{{ ansible_distribution_major_version }}"
-
-    - name: Show rhel_version variable
-      ansible.builtin.debug:
-        var: rhel_version
 
     # https://docs.ansible.com/projects/ansible/latest/collections/amazon/aws/ec2_metadata_facts_module.html
     - name: Gather EC2 metadata facts
