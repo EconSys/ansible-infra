@@ -9,7 +9,7 @@
     name: "*"
     state: latest
     update_cache: true
-    only_upgrade: true
+    update_only: true
   tags:
     - base_packages
     - system_update
