@@ -12,7 +12,6 @@
     update_only: true
   tags:
     - base_packages
-    - system_update
 
 # ============================================================================
 # EPEL REPOSITORY SETUP
@@ -25,7 +24,6 @@
     name: "{{ base_packages_codeready_builder_repo }}"
     state: enabled
   tags:
-    - base_packages
     - epel
     - repositories
 
@@ -34,7 +32,6 @@
     state: present
     key: "{{ base_packages_epel_gpg_key_url }}"
   tags:
-    - base_packages
     - epel
     - package_verification
     - repositories
@@ -49,7 +46,6 @@
     gpgcheck: true
     gpgkey: "{{ base_packages_epel_gpg_key_url }}"
   tags:
-    - base_packages
     - epel
     - package_verification
     - repositories
@@ -64,6 +60,9 @@
       - "{{ base_packages_appstream_repo }}"
       - "{{ base_packages_baseos_repo }}"
       - "{{ base_packages_codeready_builder_repo }}"
+  tags:
+    - epel
+    - base_packages
 
 # ============================================================================
 # BUILD TOOLS
@@ -96,7 +95,7 @@
       - "{{ base_packages_baseos_repo }}"
   tags:
     - base_packages
-    - system_packages
+    - system
 
 # ============================================================================
 # NETWORKING PACKAGES
