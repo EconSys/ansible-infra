@@ -16,7 +16,12 @@ source "$VENV_DIR/bin/activate"
 python3 -m pip install --upgrade pip
 
 # AWS, Ansible, and other required dependencies
-python3 -m pip install -r requirements.txt
+python3 -m pip install -r requirements.txt || exit 1
+
+ansible --version
+ansible-playbook --version
+ansible-lint --version
+python3 -m pip list
 
 # required Ansible Galaxy Collections
 ansible-galaxy collection install -r requirements.yml
