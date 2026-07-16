@@ -99,6 +99,17 @@
     - base_packages
     - networking
 
+- name: Create drop-in directory for NetworkManager-cloud-setup service
+  ansible.builtin.file:
+    path: /etc/systemd/system/nm-cloud-setup.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  tags:
+    - networking
+    - systemd
+
 # Cloud providers are disabled by default; must be explicitly enabled
 - name: Enable AWS in NetworkManager-cloud-setup drop-in
   ansible.builtin.template:
