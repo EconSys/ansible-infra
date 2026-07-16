@@ -4,6 +4,21 @@
   become: true
 
   tasks:
+    # top-level variable needed for version-specific DNF repositories
+    - name: Gather Ansible OS distribution major version
+      ansible.builtin.setup:
+        filter:
+          - distribution_major_version
+
+    - name: Set RHEL major version
+      ansible.builtin.set_fact:
+        rhel_version: "{{ ansible_facts['distribution_major_version'] }}"
+
+    - name: Show rhel_version variable
+      ansible.builtin.debug:
+        var: rhel_version
+
+    # TASKS
     - name: Install base packages
       ansible.builtin.import_role:
         name: base_packages
