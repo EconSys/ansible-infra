@@ -36,20 +36,6 @@
     - package_verification
     - repositories
 
-- name: Add EPEL repository, enable, and ensure package verification
-  ansible.builtin.yum_repository:
-    name: epel
-    description: Extra Packages for Enterprise Linux $releasever
-    state: present
-    enabled: true
-    metalink: "{{ base_packages_epel_repo_url }}"
-    gpgcheck: true
-    gpgkey: "{{ base_packages_epel_gpg_key_url }}"
-  tags:
-    - epel
-    - package_verification
-    - repositories
-
 - name: Install EPEL
   ansible.builtin.dnf:
     name: "{{ base_packages_epel_repo_url }}"
