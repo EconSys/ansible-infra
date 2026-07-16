@@ -2,11 +2,8 @@
 # ============================================================================
 # Repository
 # ============================================================================
-
-# DNF auto-expands $releasever (Release version) and $basearch (Base architecture) at runtime.
-# DO NOT hardcode - breaks code portability for future RHEL versions.
-base_packages_epel_gpg_key_url: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-$releasever
-base_packages_epel_repo_url: https://mirrors.fedoraproject.org/metalink?repo=epel-$releasever&arch=$basearch
+base_packages_epel_gpg_key_url: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ rhel_version }}
+base_packages_epel_repo_url: https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ rhel_version }}.noarch.rpm
 
 base_packages_corretto_repo_url: https://yum.corretto.aws/corretto
 

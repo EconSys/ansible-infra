@@ -4,7 +4,7 @@
   become: true
 
   tasks:
-    # top-level variable needed for version-specific DNF repositories
+    # global variable necessary for version-specific package repos
     - name: Gather Ansible OS distribution major version
       ansible.builtin.setup:
         filter:
