@@ -151,6 +151,7 @@
     state: present
     key: "{{ base_packages_corretto_repo_url }}.key"
   tags:
+    - aws
     - java
     - package_verification
 
@@ -160,10 +161,11 @@
     description: Amazon Corretto Repository
     state: present
     enabled: true
-    baseurl: "{{ base_packages_corretto_repo_url }}"
+    baseurl: "{{ base_packages_corretto_repo_url }}.repo"
     gpgcheck: true
     gpgkey: "{{ base_packages_corretto_repo_url }}.key"
   tags:
+    - aws
     - java
     - package_verification
     - repositories
