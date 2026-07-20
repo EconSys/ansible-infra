@@ -1,3 +1,4 @@
+# AWS CLI
 aws_cli_exec_path: /usr/local/aws-cli/v2/current/bin/aws
 
 aws_cli_installer_url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
@@ -6,6 +7,7 @@ aws_cli_gpg_key: aws_cli_v2_public_key.gpg
 
 aws_cli_installer: awscliv2
 
+# AWS SSM Agent
 aws_ssm_agent_package: amazon-ssm-agent.rpm
 
 aws_ssm_agent_gpg_key: aws_ssm_agent_public_key.gpg

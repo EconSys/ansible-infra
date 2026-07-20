@@ -83,7 +83,7 @@
 
 - name: Unzip AWS CLI v2 installer
   ansible.builtin.unarchive:
-    src: "{{ aws_cli_zip_path }}"
+    src: "/tmp/{{ aws_cli_installer }}.zip"
     dest: /tmp
     remote_src: true
   when:
