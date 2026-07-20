@@ -1,5 +1,6 @@
 ---
 # RHEL Packer AMI - Base Package Installation
+# TODO set SELinux context for downloads
 
 # ============================================================================
 # SYSTEM UPDATE
@@ -155,19 +156,16 @@
     - java
     - package_verification
 
-- name: Add Amazon Corretto repository and ensure package verification
-  ansible.builtin.yum_repository:
-    name: AmazonCorretto
-    description: Amazon Corretto Repository
-    state: present
-    enabled: true
-    baseurl: "{{ base_packages_corretto_repo_url }}.repo"
-    gpgcheck: true
-    gpgkey: "{{ base_packages_corretto_repo_url }}.key"
+- name: Download Amazon Corretto repository file
+  ansible.builtin.get_url:
+    url: "{{ base_packages_corretto_repo_url }}.repo"
+    dest: /etc/yum.repos.d/corretto.repo
+    owner: root
+    group: root
+    mode: "0644"
   tags:
     - aws
     - java
-    - package_verification
     - repositories
 
 - name: Install Java and ensure GPG package verification
