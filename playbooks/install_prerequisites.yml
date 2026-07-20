@@ -29,6 +29,9 @@
         name: aws
         tasks_from: install_aws_cli
 
+    - name: Set necessary environment Ansible Facts and variables
+      ansible.builtin.import_playbook: playbooks/initialize_environment.yml
+
     - name: Install SSM Agent
       ansible.builtin.import_role:
         name: aws
