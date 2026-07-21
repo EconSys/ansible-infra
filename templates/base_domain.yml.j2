@@ -1,15 +1,15 @@
 {% set account = aws_account_id_current %}
-{% set matched = [] %}
+{% set ns = namespace(result='') %}
 
 {% set teams = ['secops', 'siteops'] %}
 {% for team in teams %}
 
-  {% if not matched and account == aws_acct_id[team].prod %}
-    {% set _ = matched.append(domain[team]) %}
-  {% elif not matched and account == aws_acct_id[team].stage %}
-    {% set _ = matched.append('stage.' + domain[team]) %}
+  {% if not ns.result and account == aws_acct_id[team].prod %}
+    {% set ns.result = domain[team] %}
+  {% elif not ns.result and account == aws_acct_id[team].stage %}
+    {% set ns.result = 'stage.' + domain[team] %}
   {% endif %}
 
 {% endfor %}
 
-{{ matched[0] | default('') }}
+{{ ns.result }}
