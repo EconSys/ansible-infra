@@ -1,4 +1,4 @@
-{% set account = caller_info.account %}
+{% set account = aws_account_id_current %}
 {% set matched = [] %}
 
 {% set teams = ['secops', 'siteops'] %}
