@@ -16,16 +16,16 @@
 - name: Show OS facts
   ansible.builtin.debug:
     msg:
-      - "Date and time: {{ ansible_facts['date_time'].date }}"
+      - "Date: {{ ansible_facts['date_time'].date }}"
       - "Ansible user: {{ ansible_facts['user_id'] }}"
-      - "Distro: {{ ansible_facts['distribution'] }} version: {{ ansible_distribution_major_version }}"
+      - "Distro: {{ ansible_facts['distribution'] }} version {{ ansible_facts['distribution_major_version'] }}"
       - "Python version: {{ ansible_facts['python_version'] }}"
       - "OS family: {{ ansible_facts['os_family'] }}"
       - "System: {{ ansible_facts['system'] }}"
       - "Architecture: {{ ansible_facts['architecture'] }}"
       - "FIPS boolean: {{ ansible_facts['fips'] }}"
       - "SELinux status: {{ ansible_facts['selinux'].status }}"
-      - "Ansible default IPV4: {{ ansible_facts['default_ipv4'].address }} {{ ansible_facts['default_ipv4'].interface }}"
+      - "Ansible default IPV4: {{ ansible_facts['default_ipv4'].address }}, {{ ansible_facts['default_ipv4'].interface }} interface"
 
 # - name: Set normalized build architecture
 #   ansible.builtin.set_fact:
@@ -45,7 +45,7 @@
 
 - name: Set base domain
   ansible.builtin.set_fact:
-    base_domain: "{{ lookup('template', 'templates/base_domain.yml.j2') | trim }}"
+    base_domain: "{{ lookup('template', '../templates/base_domain.yml.j2') | trim }}"
 
 - name: Show base_domain variable
   ansible.builtin.debug:
