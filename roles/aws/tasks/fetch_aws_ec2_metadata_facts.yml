@@ -4,7 +4,7 @@
 
 - name: Set AWS region
   ansible.builtin.set_fact:
-    aws_region: "{{ ansible_ec2_placement_region }}"
+    aws_region: "{{ ansible_facts['ec2_placement_region'] }}"
 
 - name: Show aws_region variable
   ansible.builtin.debug:
@@ -12,30 +12,15 @@
 
 - name: Set AWS Instance ID
   ansible.builtin.set_fact:
-    aws_instance_id: "{{ ansible_ec2_instance_identity_document_instanceid }}"
+    aws_instance_id: "{{ ansible_facts['ec2_instance_identity_document_instanceid'] }}"
 
 - name: Show aws_instance_id variable
   ansible.builtin.debug:
     var: aws_instance_id
 
-# # https://docs.ansible.com/projects/ansible/latest/collections/amazon/aws/aws_caller_info_module.html
-- name: Get the current caller identity
-  amazon.aws.aws_caller_info:
-  register: caller_info
-  # ensure this runs even in check mode
-  check_mode: false
-
-- name: Validate account ID is present
-  ansible.builtin.fail:
-    msg: >-
-      Could not determine AWS account ID.
-      caller_info: {{ caller_info | to_nice_json }}
-  when:
-    - caller_info.account is not defined
-
 - name: Set current AWS account id
   ansible.builtin.set_fact:
-    aws_account_id_current: "{{ caller_info.account }}"
+    aws_account_id_current: "{{ ansible_facts['ec2_instance_identity_document_accountid'] }}"
 
 - name: Show aws_account_id_current variable
   ansible.builtin.debug:
