@@ -8,6 +8,18 @@ collections:
     # version: ">=13.0.0,<13.1.0"
     source: https://galaxy.ansible.com
 
+  # File ACL, firewalld, SELinux modules
+  # https://docs.ansible.com/projects/ansible/latest/collections/ansible/posix/index.html#plugins-in-ansible-posix
+  - name: ansible.posix
+    # version: ">=2.2.0"
+    source: https://galaxy.ansible.com
+
+  # Modules and plugins for cryptographic operations
+  # https://docs.ansible.com/projects/ansible/latest/collections/community/crypto/index.html
+  - name: community.crypto
+    version: ">=2.17.0"
+    source: https://galaxy.ansible.com
+
   # AWS core modules (EC2, VPC/ENI, IAM, S3, RDS, ALB, etc.)
   # Maintained by Red Hat / AWS; included in Ansible core AWS support.
   # https://docs.ansible.com/projects/ansible/latest/collections/amazon/aws/index.html
@@ -20,10 +32,4 @@ collections:
   # https://docs.ansible.com/projects/ansible/latest/collections/community/aws/index.html
   - name: community.aws
     # version: ">=11.0.0,<12.0.0"
-    source: https://galaxy.ansible.com
-
-  # File ACL, firewalld, SELinux modules
-  # https://docs.ansible.com/projects/ansible/latest/collections/ansible/posix/index.html#plugins-in-ansible-posix
-  - name: ansible.posix
-    # version: ">=2.2.0"
     source: https://galaxy.ansible.com
