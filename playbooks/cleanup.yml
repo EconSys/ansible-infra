@@ -1,0 +1,10 @@
+---
+- name: Cleanup build artifacts
+  hosts: local_host
+  become: true
+
+  tasks:
+    - name: Cleanup AWS
+      ansible.builtin.import_role:
+        name: aws
+        tasks_from: cleanup
