@@ -6,6 +6,10 @@
     owner: root
     group: root
     mode: "0755"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
 
 - name: Export full RPM database for documentation and compliance audit
   ansible.builtin.command:
@@ -33,3 +37,7 @@
     owner: root
     group: root
     mode: "0644"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default

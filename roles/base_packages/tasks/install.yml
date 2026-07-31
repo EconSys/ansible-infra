@@ -1,6 +1,5 @@
 ---
 # RHEL Packer AMI - Base Package Installation
-# TODO set SELinux context for downloads
 
 # ============================================================================
 # SYSTEM UPDATE
@@ -24,7 +23,6 @@
     state: enabled
   tags:
     - epel
-    - repositories
 
 - name: Import EPEL GPG key for package verification
   ansible.builtin.rpm_key:
@@ -33,7 +31,6 @@
   tags:
     - epel
     - package_verification
-    - repositories
 
 - name: Install EPEL
   ansible.builtin.dnf:
@@ -95,6 +92,10 @@
     owner: root
     group: root
     mode: "0755"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
 
 # Cloud providers are disabled by default; must be explicitly enabled
 - name: Enable AWS in NetworkManager-cloud-setup drop-in
@@ -104,6 +105,11 @@
     owner: root
     group: root
     mode: "0644"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
+
   notify:
     - Reload systemd
     - Start nm-cloud-setup service and ensure enabled at boot
@@ -123,8 +129,6 @@
     enablerepo:
       - "{{ base_packages_appstream_repo }}"
       - "{{ base_packages_baseos_repo }}"
-  tags:
-    - authentication
 
 # ============================================================================
 # JAVA
@@ -144,10 +148,13 @@
     owner: root
     group: root
     mode: "0644"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
   tags:
     - aws
     - java
-    - repositories
 
 - name: Install Java
   ansible.builtin.dnf:

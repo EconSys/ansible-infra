@@ -5,6 +5,10 @@
     owner: root
     group: root
     mode: "0644"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
   tags:
     - aws
 
@@ -15,9 +19,12 @@
     owner: root
     group: root
     mode: "0644"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
   tags:
     - aws
-    - package_verification
 
 - name: Copy AWS SSM Agent public key to remote
   ansible.builtin.copy:
@@ -26,9 +33,12 @@
     owner: root
     group: root
     mode: "0644"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
   tags:
     - aws
-    - package_verification
 
 - name: Import AWS SSM Agent public key into RPM keyring
   ansible.builtin.rpm_key:
@@ -36,7 +46,6 @@
     key: "/tmp/{{ aws_ssm_agent_gpg_key }}"
   tags:
     - aws
-    - package_verification
 
 - name: Verify SSM Agent RPM signature with RPM
   ansible.builtin.command:
@@ -72,4 +81,3 @@
   when: aws_ssm_agent_rpm_verify.rc == 0
   tags:
     - aws
-    - base_packages

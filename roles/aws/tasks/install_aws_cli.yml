@@ -12,6 +12,10 @@
     owner: root
     group: root
     mode: "0644"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
   when: not aws_cli_binary.stat.exists
   register: aws_cli_download
   tags:
@@ -24,6 +28,10 @@
     owner: root
     group: root
     mode: "0644"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
   when: not aws_cli_binary.stat.exists
   tags:
     - aws
@@ -36,10 +44,13 @@
     owner: root
     group: root
     mode: "0644"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
   when: not aws_cli_binary.stat.exists
   tags:
     - aws
-    - package_verification
 
 - name: Import AWS CLI v2 public key
   ansible.builtin.command:
@@ -49,7 +60,6 @@
   changed_when: false
   tags:
     - aws
-    - package_verification
 
 - name: Verify AWS CLI v2 installer zip file against signature
   ansible.builtin.command:
@@ -102,7 +112,6 @@
     - aws_cli_gpg_verify.rc == 0
   tags:
     - aws
-    - base_packages
 
 - name: Ensure aws symlink is present, always
   ansible.builtin.file:
