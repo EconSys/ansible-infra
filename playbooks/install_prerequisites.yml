@@ -37,7 +37,8 @@
 
     # set project environment variables (base_domain, rhel_version, ...)
     - name: Initialize build environment
-      ansible.builtin.import_tasks: ../tasks/initialize_environment.yml
+      ansible.builtin.import_tasks:
+        file: ../tasks/initialize_environment.yml
 
     - name: Install SSM Agent
       ansible.builtin.import_role:
