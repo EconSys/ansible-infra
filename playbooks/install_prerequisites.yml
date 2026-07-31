@@ -22,7 +22,7 @@
     - name: Install base packages
       ansible.builtin.import_role:
         name: base_packages
-        tasks_from: install_base_packages
+        tasks_from: install
 
     - name: Install AWS CLI v2
       ansible.builtin.import_role:
@@ -33,7 +33,7 @@
     - name: Fetch AWS environment facts
       ansible.builtin.import_role:
         name: aws
-        tasks_from: fetch_aws_ec2_metadata_facts.yml
+        tasks_from: fetch_metadata
 
     # set project environment variables (base_domain, rhel_version, ...)
     - name: Initialize build environment
