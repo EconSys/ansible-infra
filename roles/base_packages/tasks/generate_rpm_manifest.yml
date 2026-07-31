@@ -6,8 +6,6 @@
     owner: root
     group: root
     mode: "0755"
-  tags:
-    - base_packages
 
 - name: Export full RPM database for documentation and compliance audit
   ansible.builtin.command:
@@ -17,8 +15,6 @@
       - --last
   register: base_packages_rpm_full_output
   changed_when: false
-  tags:
-    - base_packages
 
 - name: Save RPM manifest to file
   ansible.builtin.copy:
@@ -37,5 +33,3 @@
     owner: root
     group: root
     mode: "0644"
-  tags:
-    - base_packages
