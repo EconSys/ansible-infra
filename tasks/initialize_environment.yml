@@ -43,16 +43,71 @@
 
 # TODO set Cert and Remote State S3 bucket prefix
 
-- name: Set base domain
-  ansible.builtin.set_fact:
-    base_domain: "{{ lookup('template', '../templates/base_domain.yml.j2') | trim }}"
+- name: Validate base_domain
+  ansible.builtin.assert:
+    that:
+      - base_domain is defined
+      - base_domain | trim | length > 0
+    fail_msg: >-
+      The required variable 'base_domain' is missing or empty.
+      Verify Packer variable 'BASE_DOMAIN' is set and passed with:
+        ansible-playbook -e "base_domain=${BASE_DOMAIN}"
 
-- name: Show base_domain variable
-  ansible.builtin.debug:
-    var: base_domain
+- name: Validate base_dn
+  ansible.builtin.assert:
+    that:
+      - base_dn is defined
+      - base_dn | trim | length > 0
+    fail_msg: >-
+      Required variable 'base_dn' is missing or empty.
+      Verify vars/environment.yml defines 'base_dn'.
+      Loaded with:
+        ansible-playbook -e "@vars/environment.yml"
 
-- name: Fail if account ID is not recognized
-  ansible.builtin.fail:
-    msg: >-
-      Unknown AWS account ID: {{ aws_account_id_current }}.
-  when: base_domain == ''
+- name: Validate all_roles
+  ansible.builtin.assert:
+    that:
+      - all_roles is defined
+      - all_roles is sequence
+      - all_roles | length > 0
+    fail_msg: >-
+      Required variable 'all_roles' is missing or empty.
+      Verify vars/environment.yml defines 'all_roles'.
+      Loaded with:
+        ansible-playbook -e "@vars/environment.yml"
+
+- name: Validate audit_roles
+  ansible.builtin.assert:
+    that:
+      - audit_roles is defined
+      - audit_roles is sequence
+      - audit_roles | length > 0
+    fail_msg: >-
+      Required variable 'audit_roles' is missing or empty.
+      Verify vars/environment.yml defines 'audit_roles'.
+      Loaded with:
+        ansible-playbook -e "@vars/environment.yml"
+
+- name: Validate iac_sec_roles
+  ansible.builtin.assert:
+    that:
+      - iac_sec_roles is defined
+      - iac_sec_roles is sequence
+      - iac_sec_roles | length > 0
+    fail_msg: >-
+      Required variable 'iac_sec_roles' is missing or empty.
+      Verify vars/environment.yml defines 'iac_sec_roles'.
+      Loaded with:
+        ansible-playbook -e "@vars/environment.yml"
+
+- name: Validate iac_site_roles
+  ansible.builtin.assert:
+    that:
+      - iac_site_roles is defined
+      - iac_site_roles is sequence
+      - iac_site_roles | length > 0
+    fail_msg: >-
+      Required variable 'iac_site_roles' is missing or empty.
+      Verify vars/environment.yml defines 'iac_site_roles'.
+      Loaded with:
+        ansible-playbook -e "@vars/environment.yml"

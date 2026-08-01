@@ -3,3 +3,7 @@
 
 # Python Virtual Environment for Ansible project
 /.ansible_venv/
+
+# Runtime-generated Ansible variables loaded with:
+# ansible-playbook -e "@vars/environment.yml"
+vars/environment.yml
