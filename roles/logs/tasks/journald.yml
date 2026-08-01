@@ -1,0 +1,34 @@
+- name: Create journald configuration drop-in directory
+  ansible.builtin.file:
+    path: /etc/systemd/journald.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
+
+- name: Configure journald overrides
+  ansible.builtin.copy:
+    src: "journald/{{ item }}"
+    dest: "/etc/systemd/journald.conf.d/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
+  loop:
+    - 10-persistent-storage.conf
+    - 20-forward-to-syslog.conf
+    - 30-storage-limits.conf
+  notify:
+    - Restart journald
+
+- name: Validate journald configuration
+  ansible.builtin.command:
+    cmd: systemd-analyze verify /etc/systemd/journald.conf
+  changed_when: false

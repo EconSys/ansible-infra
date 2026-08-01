@@ -1,6 +1,9 @@
 ---
-- name: Base packages
+- name: Install base packages and set environment variables
   ansible.builtin.import_playbook: playbooks/install_prerequisites.yml
+
+- name: Configure logging
+  ansible.builtin.import_playbook: playbooks/configure_logging.yml
 
 - name: Cleanup
   ansible.builtin.import_playbook: playbooks/cleanup.yml

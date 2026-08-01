@@ -1,0 +1,11 @@
+- name: Ensure rsyslog installed
+  ansible.builtin.dnf:
+    name: rsyslog
+    state: present
+    disable_gpg_check: false
+
+- name: Ensure logrotate installed
+  ansible.builtin.dnf:
+    name: logrotate
+    state: present
+    disable_gpg_check: false

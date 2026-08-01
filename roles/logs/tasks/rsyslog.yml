@@ -1,0 +1,28 @@
+- name: Ensure rsyslog drop-in directory exists
+  ansible.builtin.file:
+    path: /etc/rsyslog.d/
+    state: directory
+    mode: '0755'
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
+
+- name: Configure rsyslog log segmentation
+  ansible.builtin.copy:
+    src: rsyslog/10-system-log-segmentation.conf
+    dest: /etc/rsyslog.d/10-system-log-segmentation.conf
+    owner: root
+    group: root
+    mode: "0644"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
+  notify:
+    - Restart rsyslog
+
+- name: Validate rsyslog configuration
+  ansible.builtin.command:
+    cmd: rsyslogd -N1
+  changed_when: false

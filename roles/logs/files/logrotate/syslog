@@ -1,0 +1,36 @@
+/var/log/cron
+/var/log/daemon.log
+/var/log/kern.log
+/var/log/maillog
+/var/log/messages
+/var/log/secure
+/var/log/spooler
+/var/log/syslog
+{
+  daily
+
+  # retain seven rotated log files (approximately one week with daily rotation)
+  rotate 7
+
+  # rotate early if a log reaches this threshhold:
+  size 100M
+
+  # skip rotation if log is empty or missing
+  notifempty
+  missingok
+
+  # create new log files after rotation
+  create 0640 root root
+
+  # append the current date to rotated log filenames
+  dateext
+
+  # compress rotated logs, delaying compression until the next rotation
+  compress
+  delaycompress
+  
+  sharedscripts
+  postrotate
+    /usr/bin/systemctl -s HUP kill rsyslog.service >/dev/null 2>&1 || true
+  endscript
+}
