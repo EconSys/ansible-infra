@@ -1,0 +1,17 @@
+services:
+  infra:
+    container_name: test-ansible
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        - PYTHON_VERSION=3.12
+    environment:
+      - AWS_PROFILE=default
+      - AWS_REGION=us-gov-west-1
+    volumes:
+      - .:/opt/ansible
+      - $HOME/.aws:/root/.aws:ro
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
