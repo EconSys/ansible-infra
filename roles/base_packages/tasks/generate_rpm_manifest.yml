@@ -24,9 +24,9 @@
   ansible.builtin.copy:
     content: |
       # RHEL Packer AMI - Installed Packages Manifest
-      # Generated: {{ ansible_date_time.iso8601 }}
-      # Hostname: {{ ansible_hostname }}
-      # OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
+      # Generated: {{ ansible_facts['date_time'].iso8601 }}
+      # Hostname: {{ ansible_facts['hostname'] }}
+      # OS: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}
       # ========================================================================
       # Complete RPM database dump (all packages including dependencies)
       # Format: package-version-release.arch  install_timestamp
