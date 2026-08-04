@@ -10,8 +10,8 @@
 
 - name: Configure rsyslog log segmentation
   ansible.builtin.copy:
-    src: rsyslog/10-system-log-segmentation.conf
-    dest: /etc/rsyslog.d/10-system-log-segmentation.conf
+    src: rsyslog/10-supplemental-system-logs.conf
+    dest: /etc/rsyslog.d/10-supplemental-system-logs.conf
     owner: root
     group: root
     mode: "0644"

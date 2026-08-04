@@ -1,19 +1,18 @@
-/var/log/cron
+# These logs supplement the default RHEL log files.
+# Rotate the additional log files created by
+# /etc/rsyslog.d/10-supplemental-system-logs.conf.
+
 /var/log/daemon.log
 /var/log/kern.log
-/var/log/maillog
-/var/log/messages
-/var/log/secure
-/var/log/spooler
 /var/log/syslog
 {
   daily
 
-  # retain seven rotated log files (approximately one week with daily rotation)
+  # retain seven rotated log files (approximately one week)
   rotate 7
 
-  # rotate early if a log reaches this threshhold:
-  size 100M
+  # rotate early if a log reaches this threshold:
+  minsize 100M
 
   # skip rotation if log is empty or missing
   notifempty
@@ -25,7 +24,7 @@
   # append the current date to rotated log filenames
   dateext
 
-  # compress rotated logs, delaying compression until the next rotation
+  # compress rotated logs on the following rotation
   compress
   delaycompress
   
