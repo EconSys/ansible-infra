@@ -1,16 +1,15 @@
 #! /usr/bin/env bash
 set -eu
-# TODO troubleshoot what's failing
-# set -o pipefail
+set -o pipefail
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
   logger -t "You are not running as the root user.  Please try again with root privileges."
   exit 1
 fi
 
-# create/reuse Ansible environment; protect against breaking package dependencies
-VENV_DIR=".ansible_venv"
- 
+# ensure we're in the same virtualenv so we don't break package dependencies
+VENV_DIR=${1:?missing venv path}
+
 if [ ! -d "$VENV_DIR" ]; then
   python3 -m venv "$VENV_DIR"
 fi
@@ -27,7 +26,6 @@ python3 -m pip install -r requirements.txt || exit 1
 
 ansible --version
 ansible-playbook --version
-ansible-lint --version
 python3 -m pip list
 
 # required Ansible Galaxy Collections
