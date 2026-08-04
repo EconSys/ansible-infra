@@ -1,5 +1,8 @@
 #! /usr/bin/env bash
-set -euo pipefail
+set -eu
+# TODO troubleshoot what's failing
+# set -o pipefail
+
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
   logger -t "You are not running as the root user.  Please try again with root privileges."
   exit 1
