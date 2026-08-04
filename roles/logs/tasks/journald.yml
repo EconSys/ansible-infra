@@ -27,8 +27,3 @@
     - 30-storage-limits.conf
   notify:
     - Restart journald
-
-- name: Validate journald configuration
-  ansible.builtin.command:
-    cmd: systemd-analyze verify /etc/systemd/journald.conf
-  changed_when: false
