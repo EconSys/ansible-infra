@@ -79,5 +79,6 @@
     state: present
     disable_gpg_check: false
   when: aws_ssm_agent_rpm_verify.rc == 0
+  notify: Start and enable amazon-ssm-agent
   tags:
     - aws
