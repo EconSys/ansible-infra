@@ -64,6 +64,39 @@
       Loaded with:
         ansible-playbook -e "@vars/environment.yml"
 
+- name: Validate group_dn
+  ansible.builtin.assert:
+    that:
+      - group_dn is defined
+      - group_dn | trim | length > 0
+    fail_msg: >-
+      Required variable 'group_dn' is missing or empty.
+      Verify vars/environment.yml defines 'group_dn'.
+      Loaded with:
+        ansible-playbook -e "@vars/environment.yml"
+
+- name: Validate users_dn
+  ansible.builtin.assert:
+    that:
+      - users_dn is defined
+      - users_dn | trim | length > 0
+    fail_msg: >-
+      Required variable 'users_dn' is missing or empty.
+      Verify vars/environment.yml defines 'users_dn'.
+      Loaded with:
+        ansible-playbook -e "@vars/environment.yml"
+
+- name: Validate bind_dn
+  ansible.builtin.assert:
+    that:
+      - bind_dn is defined
+      - bind_dn | trim | length > 0
+    fail_msg: >-
+      Required variable 'bind_dn' is missing or empty.
+      Verify vars/environment.yml defines 'bind_dn'.
+      Loaded with:
+        ansible-playbook -e "@vars/environment.yml"
+
 - name: Validate all_roles
   ansible.builtin.assert:
     that:
