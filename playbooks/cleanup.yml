@@ -8,3 +8,8 @@
       ansible.builtin.import_role:
         name: aws
         tasks_from: cleanup
+
+    - name: Cleanup logs
+      ansible.builtin.import_role:
+        name: logs
+        tasks_from: cleanup

@@ -1,0 +1,77 @@
+- name: Rotate journald logs
+  ansible.builtin.command:
+    cmd: journalctl --rotate
+  changed_when: false
+
+- name: Remove archived journald logs
+  ansible.builtin.command:
+    cmd: journalctl --vacuum-size=0
+  changed_when: false
+
+- name: Stop rsyslog
+  ansible.builtin.systemd_service:
+    name: rsyslog.service
+    state: stopped
+
+- name: Stop auditd
+  ansible.builtin.systemd_service:
+    name: auditd.service
+    state: stopped
+
+- name: Find audit log files
+  ansible.builtin.find:
+    paths: /var/log/audit
+    recurse: true
+    file_type: file
+  register: logs_audit_files
+  failed_when: false
+  changed_when: false
+
+- name: Remove audit logs
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ logs_audit_files.files }}"
+
+- name: Check accounting databases
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - /var/log/wtmp
+    - /var/log/btmp
+    - /var/log/lastlog
+    - /var/log/faillog
+    - /var/log/tallylog
+  register: logs_accounting_files
+
+- name: Truncate accounting databases
+  ansible.builtin.shell:
+    cmd: ': > "{{ item.item }}"'
+  loop: "{{ logs_accounting_files.results }}"
+  when:
+    - item.stat.exists
+    - item.stat.isreg
+  changed_when: item.stat.size > 0
+
+- name: Find remaining log files
+  ansible.builtin.find:
+    paths: /var/log
+    recurse: true
+    file_type: file
+    excludes:
+      - journal
+      - audit
+      - btmp
+      - wtmp
+      - faillog
+      - lastlog
+      - tallylog
+  register: logs_files
+  failed_when: false
+  changed_when: false
+
+- name: Remove remaining log files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ logs_files.files }}"
