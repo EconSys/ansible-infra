@@ -27,3 +27,11 @@
     - 30-storage-limits.conf
   notify:
     - Restart journald
+
+- name: Enable journald
+  ansible.builtin.systemd_service:
+    name: systemd-journald.service
+    enabled: true
+  tags:
+    - DISA-STIG
+    - RHEL-09-211040
