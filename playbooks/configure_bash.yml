@@ -1,0 +1,7 @@
+---
+- name: Configure Bash profile
+  hosts: local_host
+  become: true
+
+  roles:
+    - role: bash
