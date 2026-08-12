@@ -1,27 +1,50 @@
-- name: Verify Bash history directory
+- name: Inspect Bash history directory
   ansible.builtin.stat:
     path: /var/log/bashhist
   register: bash_hist_dir
 
-- name: Assert Bash history directory exists
+- name: Assert Bash history directory attributes
   ansible.builtin.assert:
     that:
       - bash_hist_dir.stat.exists
       - bash_hist_dir.stat.isdir
+      - bash_hist_dir.stat.pw_name == "root"
+      - bash_hist_dir.stat.gr_name == "root"
       - bash_hist_dir.stat.mode == "1755"
+    fail_msg: |
+      Bash history directory attributes validation failed.
 
-- name: Verify Bash history profile is installed
+      Expected:
+        /var/log/bashhist
+        type: directory
+        owner: root
+        group: root
+        mode: 1755
+
+- name: Inspect Bash history profile
   ansible.builtin.stat:
     path: /etc/profile.d/bash-history.sh
   register: bash_hist_profile
 
-- name: Assert Bash history profile exists
+- name: Assert Bash history profile attributes
   ansible.builtin.assert:
     that:
       - bash_hist_profile.stat.exists
+      - bash_hist_profile.stat.isreg
+      - bash_hist_profile.stat.pw_name == "root"
+      - bash_hist_profile.stat.gr_name == "root"
       - bash_hist_profile.stat.mode == "0644"
+    fail_msg: |
+      Bash history profile attributes validation failed.
 
-- name: Verify Bash profile timeout configuration
+      Expected:
+        /etc/profile.d/bash-history.sh
+        type: regular file
+        owner: root
+        group: root
+        mode: 0644
+
+- name: Inspect Bash profile timeout configuration
   ansible.builtin.command:
     cmd: >
       bash -lc 'printf "TMOUT=%s\n" "$TMOUT"; declare -p TMOUT'
