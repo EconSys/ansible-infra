@@ -16,10 +16,15 @@
 
       Expected:
         /var/log/bashhist
-        type: directory
         owner: root
         group: root
         mode: 1755
+
+      Actual:
+        {{ bash_hist_dir.stat.path }}
+        owner: {{ bash_hist_dir.stat.pw_name }}
+        group: {{ bash_hist_dir.stat.gr_name }}
+        mode: {{ bash_hist_dir.stat.mode }}
 
 - name: Inspect Bash history profile
   ansible.builtin.stat:
@@ -39,10 +44,15 @@
 
       Expected:
         /etc/profile.d/bash-history.sh
-        type: regular file
         owner: root
         group: root
         mode: 0644
+
+      Actual:
+        {{ bash_hist_profile.stat.path }}
+        owner: {{ bash_hist_profile.stat.pw_name }}
+        group: {{ bash_hist_profile.stat.gr_name }}
+        mode: {{ bash_hist_profile.stat.mode }}
 
 - name: Inspect Bash profile timeout configuration
   ansible.builtin.command:
