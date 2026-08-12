@@ -1,11 +1,22 @@
 - name: Ensure logging packages installed
   ansible.builtin.import_tasks: install.yml
+  tags:
+    - logs
 
 - name: Configure journald
   ansible.builtin.import_tasks: journald.yml
+  tags:
+    - logs
+    - journald
 
 - name: Configure rsyslog
   ansible.builtin.import_tasks: rsyslog.yml
+  tags:
+    - logs
+    - rsyslog
 
 - name: Configure logrotate
   ansible.builtin.import_tasks: logrotate.yml
+  tags:
+    - logs
+    - logrotate
