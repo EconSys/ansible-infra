@@ -1,0 +1,58 @@
+- name: Verify Bash history directory
+  ansible.builtin.stat:
+    path: /var/log/bashhist
+  register: bash_hist_dir
+
+- name: Assert Bash history directory exists
+  ansible.builtin.assert:
+    that:
+      - bash_hist_dir.stat.exists
+      - bash_hist_dir.stat.isdir
+      - bash_hist_dir.stat.mode == "1755"
+
+- name: Verify Bash history profile is installed
+  ansible.builtin.stat:
+    path: /etc/profile.d/bash-history.sh
+  register: bash_hist_profile
+
+- name: Assert Bash history profile exists
+  ansible.builtin.assert:
+    that:
+      - bash_hist_profile.stat.exists
+      - bash_hist_profile.stat.mode == "0644"
+
+- name: Verify Bash profile timeout configuration
+  ansible.builtin.command:
+    cmd: >
+      bash -lc 'printf "TMOUT=%s\n" "$TMOUT"; declare -p TMOUT'
+  register: bash_tmout
+  changed_when: false
+  tags:
+    - DISA-STIG
+    - RHEL-09-412035
+
+- name: Assert Bash idle terminal session timeout
+  ansible.builtin.assert:
+    that:
+      - bash_tmout.rc == 0
+      - bash_tmout.stderr | length == 0
+      - bash_tmout.stdout is search('(?m)^TMOUT=600$')
+      - bash_tmout.stdout is search('(?m)^declare -rx TMOUT="600"$')
+    fail_msg: |
+      Idle terminal session timeout validation failed.
+
+      Expected:
+        TMOUT=600
+        TMOUT is readonly and exported
+
+      Command return code:
+        {{ bash_tmout.rc }}
+
+      stdout:
+      {{ bash_tmout.stdout | default('<empty>') | indent(2, true) }}
+
+      stderr:
+      {{ bash_tmout.stderr | default('<empty>') | indent(2, true) }}
+  tags:
+    - DISA-STIG
+    - RHEL-09-412035

@@ -1,0 +1,11 @@
+- name: Configure idle terminal session timeout
+  ansible.builtin.copy:
+    src: tmout.sh
+    dest: /etc/profile.d/tmout.sh
+    owner: root
+    group: root
+    mode: '0644'
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default

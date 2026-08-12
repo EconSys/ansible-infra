@@ -1,0 +1,16 @@
+- name: Configure Bash history for SIEM
+  ansible.builtin.import_tasks: configure_bashhist.yml
+  tags:
+    - bash
+
+- name: Configure idle Bash terminal session timeout
+  ansible.builtin.import_tasks: configure_tmout.yml
+  tags:
+    - bash
+    - DISA-STIG
+    - RHEL-09-412035
+
+- name: Validate Bash profile configurations
+  ansible.builtin.import_tasks: validate.yml
+  tags:
+    - bash

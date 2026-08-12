@@ -1,0 +1,23 @@
+- name: Create Bash history log directory
+  ansible.builtin.file:
+    path: /var/log/bashhist
+    state: directory
+    owner: root
+    group: root
+    mode: "1755"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
+
+- name: Install Bash history profile
+  ansible.builtin.copy:
+    src: bash-history.sh
+    dest: /etc/profile.d/bash-history.sh
+    owner: root
+    group: root
+    mode: "0644"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
