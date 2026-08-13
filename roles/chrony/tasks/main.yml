@@ -1,0 +1,14 @@
+- name: Install chrony packages
+  ansible.builtin.import_tasks: install.yml
+  tags:
+    - chrony
+
+- name: Configure chrony time synchronization
+  ansible.builtin.import_tasks: configure.yml
+  tags:
+    - chrony
+
+- name: Validate chrony time synchronization
+  ansible.builtin.import_tasks: validate.yml
+  tags:
+    - chrony

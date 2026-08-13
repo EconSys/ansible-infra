@@ -1,0 +1,48 @@
+- name: Wait for chrony synchronization
+  ansible.builtin.command:
+    cmd: chronyc waitsync 30
+  register: chrony_waitsync
+  changed_when: false
+  failed_when: false
+
+- name: Get chrony tracking
+  ansible.builtin.command:
+    cmd: chronyc tracking
+  register: chrony_tracking
+  changed_when: false
+
+- name: Assert chrony is synchronized
+  ansible.builtin.assert:
+    that:
+      - chrony_waitsync.rc == 0
+      - chrony_tracking.stdout is regex('(?m)^Leap status\\s*:\\s*Normal$')
+    fail_msg: |
+      chrony is not synchronized.
+
+      waitsync:
+      {{ chrony_waitsync.stdout }}
+
+      tracking:
+      {{ chrony_tracking.stdout }}
+
+- name: Extract chrony clock offset
+  ansible.builtin.set_fact:
+    chrony_clock_offset: >-
+      {{
+        chrony_tracking.stdout
+        | regex_search('(?m)^Last offset\s*:\s*([+-]?[0-9.eE+-]+)', '\1')
+        | first
+      }}
+
+- name: Verify chronyd clock offset is within acceptable limits
+  ansible.builtin.assert:
+    that:
+      - chrony_clock_offset | float | abs <= chrony_validation_max_offset
+    fail_msg: |
+      chronyd clock offset is outside the acceptable limit.
+
+      Current offset: {{ chrony_clock_offset }} seconds
+      Maximum allowed offset: {{ chrony_validation_max_offset }} seconds
+
+      chronyc tracking:
+      {{ chrony_tracking.stdout }}

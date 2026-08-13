@@ -1,0 +1,37 @@
+# Record the rate at which the system clock gains/loses time
+driftfile /var/lib/chrony/drift
+
+# Allow the system clock to be stepped in the first three updates
+# if its offset is larger than {{ chrony_max_offset }} seconds
+makestep {{ chrony_max_offset }} 3
+
+# Enable kernel synchronization of the real-time clock (RTC)
+rtcsync
+
+# Per CCE-82988-7: Set port 0 in /etc/chrony.conf
+port 0
+
+# Local chronyc control is required for boot-time health validation and automation.
+# Setting cmdport 0 fully disables the control socket and breaks:
+#   - chronyc tracking
+#   - makestep/burst
+#   - automated time-sync verification
+# which can leave EC2 instances unsynchronized and causes TLS failures
+# for services such as AWS Systems Manager Agent as well as other issues:
+# https://bugzilla.redhat.com/show_bug.cgi?id=2026301
+#
+# The following provides equivalent security for CCE-82840-0 without breaking automation
+# bindcmdaddress/cmdallow restricts control to IPv4 localhost only,
+# preventing any remote access while preserving local administration.
+bindcmdaddress 127.0.0.1
+cmdallow 127.0.0.1
+
+# --- EC2 reliable time source (REQUIRED) ---
+# IMDSv2 link-local time server.
+# Must remain enabled or instances may fail to sync time,
+# which breaks TLS and causes SSM Agent to go offline.
+server {{ chrony_ntp_servers_aws.server }} {{ chrony_ntp_servers_aws.options }}
+# NIST servers
+{% for ntp in chrony_ntp_servers_nist %}
+server {{ ntp.server }} {{ ntp.options }}
+{% endfor %}

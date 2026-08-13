@@ -1,0 +1,22 @@
+- name: Install chronyd
+  ansible.builtin.dnf:
+    name: chronyd
+    state: present
+    disable_gpg_check: false
+
+- name: Install chrony-wait
+  ansible.builtin.dnf:
+    name: chrony-wait
+    state: present
+    disable_gpg_check: false
+
+- name: Enable and start chronyd
+  ansible.builtin.systemd_service:
+    name: chronyd.service
+    state: started
+    enabled: true
+
+- name: Enable chrony-wait
+  ansible.builtin.systemd_service:
+    name: chrony-wait.service
+    enabled: true

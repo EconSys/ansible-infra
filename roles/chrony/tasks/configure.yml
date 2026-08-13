@@ -1,0 +1,33 @@
+# address InvalidSignatureException caused by time out-of-sync resulting in TLS failures
+- name: Configure chrony time synchronization
+  ansible.builtin.template:
+    src: chrony.conf.j2
+    dest: /etc/chrony.conf
+    owner: root
+    group: root
+    mode: "0600"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
+  notify:
+    - Restart chronyd
+  tags:
+    - aws
+
+- name: Ensure amazon-ssm-agent waits for synchronized system time
+  ansible.builtin.copy:
+    src: chrony-sync.conf
+    dest: /etc/systemd/system/amazon-ssm-agent.service.d/10-chrony-sync.conf
+    owner: root
+    group: root
+    mode: "0600"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
+  notify:
+    - Reload systemd
+    - Restart amazon-ssm-agent
+  tags:
+    - aws

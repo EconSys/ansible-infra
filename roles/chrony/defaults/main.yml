@@ -1,0 +1,21 @@
+# Maximum initial clock offset that triggers chronyd to step the clock
+chrony_max_offset: 1.0
+
+# Maximum residual clock offset accepted during AMI validation
+chrony_validation_max_offset: 0.1
+
+chrony_ntp_servers_aws:
+  server: "169.254.169.123"
+  options: "prefer iburst minpoll 4 maxpoll 4"
+
+chrony_ntp_servers_nist:
+  - server: "time-a-g.nist.gov"
+    options: "iburst maxpoll 16"
+  - server: "time-b-g.nist.gov"
+    options: "iburst maxpoll 16"
+  - server: "time-c-g.nist.gov"
+    options: "iburst maxpoll 16"
+  - server: "time-d-g.nist.gov"
+    options: "iburst maxpoll 16"
+  - server: "time.nist.gov"
+    options: "iburst maxpoll 16"

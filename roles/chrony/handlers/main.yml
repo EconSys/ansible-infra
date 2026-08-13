@@ -1,0 +1,13 @@
+- name: Reload systemd
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+
+- name: Restart amazon-ssm-agent
+  ansible.builtin.systemd_service:
+    name: amazon-ssm-agent.service
+    state: restarted
+
+- name: Restart chronyd
+  ansible.builtin.systemd_service:
+    name: chronyd.service
+    state: restarted
