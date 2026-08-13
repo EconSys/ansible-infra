@@ -15,7 +15,19 @@
   tags:
     - aws
 
-- name: Ensure amazon-ssm-agent waits for synchronized system time
+- name: Create drop-in directory for SSM Agent service
+  ansible.builtin.file:
+    path: /etc/systemd/system/amazon-ssm-agent.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
+
+- name: Ensure SSM Agent waits for synchronized system time
   ansible.builtin.copy:
     src: chrony-sync.conf
     dest: /etc/systemd/system/amazon-ssm-agent.service.d/10-chrony-sync.conf
