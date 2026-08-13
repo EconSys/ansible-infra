@@ -3,7 +3,7 @@
   ansible.builtin.import_playbook: playbooks/install_prerequisites.yml
 
 - name: Configure chronyd
-  ansible.builtin.import_playbook: playbooks/configure_chronyd.yml
+  ansible.builtin.import_playbook: playbooks/configure_chrony.yml
 
 - name: Configure Bash profile
   ansible.builtin.import_playbook: playbooks/configure_bash.yml
