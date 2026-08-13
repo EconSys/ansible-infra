@@ -13,11 +13,6 @@
     name: rsyslog.service
     state: stopped
 
-- name: Stop auditd
-  ansible.builtin.systemd_service:
-    name: auditd.service
-    state: stopped
-
 - name: Find audit log files
   ansible.builtin.find:
     paths: /var/log/audit
