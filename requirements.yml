@@ -8,7 +8,7 @@ collections:
     # version: ">=13.0.0,<13.1.0"
     source: https://galaxy.ansible.com
 
-  # File ACL, firewalld, SELinux modules
+  # File ACL, firewalld, SELinux modules, sysctl kernel parameters
   # https://docs.ansible.com/projects/ansible/latest/collections/ansible/posix/index.html#plugins-in-ansible-posix
   - name: ansible.posix
     # version: ">=2.2.0"
