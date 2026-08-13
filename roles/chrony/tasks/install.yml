@@ -1,12 +1,6 @@
 - name: Install chronyd
   ansible.builtin.dnf:
-    name: chronyd
-    state: present
-    disable_gpg_check: false
-
-- name: Install chrony-wait
-  ansible.builtin.dnf:
-    name: chrony-wait
+    name: chrony
     state: present
     disable_gpg_check: false
 
