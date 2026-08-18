@@ -9,7 +9,7 @@
 #     name: sysctl
 #     tasks_from: configure_ip_forwarding.yml
 
-- name: Enable IPv4 forwarding
+- name: Enable IPv4 forwarding for router workload
   ansible.posix.sysctl:
     name: net.ipv4.ip_forward
     value: '1'
@@ -19,27 +19,60 @@
     reload: false
   notify: Reload sysctl configuration
 
-- name: Print out IPv4 forwarding setting
+- name: Enable IPv4 forwarding on all interfaces for router workload
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.all.forwarding
+    value: '1'
+    state: present
+    sysctl_file: "{{ sysctl_conf_ip_forwarding }}"
+    sysctl_set: true
+    reload: false
+  notify: Reload sysctl
+
+- name: Define expected IPv4 forwarding settings
+  ansible.builtin.set_fact:
+    sysctl_ip_forwarding:
+      - name: net.ipv4.ip_forward
+        value: "1"
+
+      - name: net.ipv4.conf.all.forwarding
+        value: "1"
+  changed_when: false
+
+- name: Read IPv4 forwarding settings for router workload
   ansible.builtin.command:
     argv:
       - /sbin/sysctl
       - -n
-      - net.ipv4.ip_forward
-  register: sysctl_ip_forwarding_runtime
+      - "{{ sysctl_forwarding.name }}"
+  loop: "{{ sysctl_ip_forwarding }}"
+  loop_control:
+    loop_var: sysctl_forwarding
+    label: "{{ sysctl_forwarding.name }}"
+  register: sysctl_forwarding_actual
   changed_when: false
   failed_when: false
 
-- name: Assert IPv4 forwarding is enabled
+- name: Assert IPv4 forwarding settings are enabled
   ansible.builtin.assert:
     that:
-      - sysctl_ip_forwarding_runtime.rc == 0
-      - (sysctl_ip_forwarding_runtime.stdout | trim) == "1"
+      - sysctl_forwarding_actual.rc == 0
+      - >-
+        (sysctl_forwarding_actual.stdout | trim)
+        == sysctl_forwarding_actual.sysctl_forwarding.value
     fail_msg: >-
-      IPv4 forwarding validation failed.
+      IPv4 forwarding validation failed for
+      {{ sysctl_forwarding_actual.sysctl_forwarding.name }}.
 
-      Expected: 1
-      Actual: {{ sysctl_ip_forwarding_runtime.stdout | default('<unavailable>') | trim }}
+      Expected: {{ sysctl_forwarding_actual.sysctl_forwarding.value }}
+      Actual: {{ sysctl_forwarding_actual.stdout | default('<unavailable>') | trim }}
 
-      Return code: {{ sysctl_ip_forwarding_runtime.rc }}
-      Stderr: {{ sysctl_ip_forwarding_runtime.stderr | default('') | trim }}
+      Return code: {{ sysctl_forwarding_actual.rc }}
+
+      stderr:
+      {{ sysctl_forwarding_actual.stderr | default('') | trim }}
     quiet: true
+  loop: "{{ sysctl_forwarding_actual.results }}"
+  loop_control:
+    loop_var: sysctl_forwarding_actual
+    label: "{{ sysctl_forwarding_actual.sysctl_forwarding.name }}"
