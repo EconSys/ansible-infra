@@ -1,0 +1,45 @@
+---
+# IPv4 forwarding is NOT a global baseline setting;
+# it's overriding baseline hardening.
+# Only import this task from a role that requires packet forwarding.
+#
+# Example in roles/openvpn/tasks/main.yml:
+# - name: Configure IPv4 forwarding for OpenVPN
+#   ansible.builtin.import_role:
+#     name: sysctl
+#     tasks_from: configure_ip_forwarding.yml
+
+- name: Enable IPv4 forwarding
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    sysctl_file: "{{ sysctl_conf_ip_forwarding }}"
+    sysctl_set: true
+    reload: false
+  notify: Reload sysctl configuration
+
+- name: Print out IPv4 forwarding setting
+  ansible.builtin.command:
+    argv:
+      - /sbin/sysctl
+      - -n
+      - net.ipv4.ip_forward
+  register: sysctl_ip_forwarding_runtime
+  changed_when: false
+  failed_when: false
+
+- name: Assert IPv4 forwarding is enabled
+  ansible.builtin.assert:
+    that:
+      - sysctl_ip_forwarding_runtime.rc == 0
+      - (sysctl_ip_forwarding_runtime.stdout | trim) == "1"
+    fail_msg: >-
+      IPv4 forwarding validation failed.
+
+      Expected: 1
+      Actual: {{ sysctl_ip_forwarding_runtime.stdout | default('<unavailable>') | trim }}
+
+      Return code: {{ sysctl_ip_forwarding_runtime.rc }}
+      Stderr: {{ sysctl_ip_forwarding_runtime.stderr | default('') | trim }}
+    quiet: true

@@ -1,0 +1,7 @@
+---
+- name: Configure sysctl hardening
+  hosts: local_host
+  become: true
+
+  roles:
+    - role: sysctl

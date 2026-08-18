@@ -1,0 +1,206 @@
+---
+# Baseline hardening: role-owned local sysctl policy.
+# Files load lexicographically under /etc/sysctl.d and
+# intentionally override vendor defaults under /usr/lib/sysctl.d.
+#
+# RHEL symlinks /etc/sysctl.d/99-sysctl.conf -> /etc/sysctl.conf.
+# Keep /etc/sysctl.conf comment-only, because
+# it loads after these files and overrides duplicate sysctl assignments.
+
+# baseline hardening
+sysctl_conf_fs: /etc/sysctl.d/60-fs-hardening.conf
+sysctl_conf_kernel: /etc/sysctl.d/61-kernel-hardening.conf
+sysctl_conf_network: /etc/sysctl.d/62-network-hardening.conf
+sysctl_conf_user: /etc/sysctl.d/63-user-hardening.conf
+
+# Use 70+ for custom overrides of baseline hardening
+sysctl_conf_ip_forwarding: /etc/sysctl.d/70-ip-forwarding.conf
+
+sysctl_params:
+  # RHEL 9 must enable kernel parameters to enforce discretionary access
+  # control on hardlinks. This prevents users from creating hard links to
+  # files they do not own.
+  - name: fs.protected_hardlinks
+    value: "1"
+    file: "{{ sysctl_conf_fs }}"
+    stig: "RHEL-09-213030"
+
+  # RHEL 9 must disable the kernel.core_pattern. Core dumps can contain
+  # sensitive data from process memory. Review and document an approved
+  # exception if crash-dump collection is operationally required.
+  - name: kernel.core_pattern
+    value: "|/bin/false"
+    file: "{{ sysctl_conf_kernel }}"
+    stig: "RHEL-09-213040"
+
+  # RHEL 9 must restrict access to the kernel message buffer. Requiring
+  # CAP_SYSLOG to read dmesg limits exposure of kernel addresses, device
+  # information, and other potentially sensitive diagnostic output.
+  #
+  # This can affect non-root troubleshooting and monitoring tooling that
+  # reads the kernel ring buffer.
+  - name: kernel.dmesg_restrict
+    value: "1"
+    file: "{{ sysctl_conf_kernel }}"
+    stig: "RHEL-09-213010"
+
+  # RHEL 9 must disable kernel image loading. This prevents a running
+  # system from loading a replacement kernel with kexec.
+  #
+  # This setting cannot be re-enabled until reboot. Do not apply before an
+  # approved kexec or kdump/crash-kernel workflow has completed.
+  - name: kernel.kexec_load_disabled
+    value: "1"
+    file: "{{ sysctl_conf_kernel }}"
+    stig: "RHEL-09-213020"
+
+  # RHEL 9 must implement address space layout randomization (ASLR).
+  # Value 2 enables full ASLR, including heap randomization.
+  #
+  # Value 1 is weaker and does not satisfy this STIG requirement. Test
+  # legacy applications that depend on predictable process memory layout.
+  - name: kernel.randomize_va_space
+    value: "2"
+    file: "{{ sysctl_conf_kernel }}"
+    stig: "RHEL-09-213070"
+
+  # RHEL 9 must restrict usage of ptrace to descendant processes.
+  # This limits process inspection and debugging by unrelated processes.
+  #
+  # This can affect debuggers, crash-analysis tools, and monitoring agents
+  # that attach to non-descendant processes.
+  - name: kernel.yama.ptrace_scope
+    value: "1"
+    file: "{{ sysctl_conf_kernel }}"
+    stig: "RHEL-09-213080"
+
+  # RHEL 9 must enable hardening for the BPF JIT compiler. Value 2 enables
+  # hardening for all users and reduces potential information disclosure
+  # from BPF JIT compilation.
+  #
+  # Confirm compatibility with BPF-based observability, tracing, security,
+  # and container tooling used by the workload.
+  - name: net.core.bpf_jit_harden
+    value: "2"
+    file: "{{ sysctl_conf_network }}"
+    stig: "RHEL-09-251045"
+
+  # RHEL 9 must use SYN cookies to protect against TCP SYN-flood attacks.
+  # SYN cookies are used when the TCP SYN backlog overflows, helping avoid
+  # resource exhaustion from incomplete TCP handshakes.
+  - name: net.ipv4.tcp_syncookies
+    value: "1"
+    file: "{{ sysctl_conf_network }}"
+    stig: "RHEL-09-253010"
+
+  # RHEL 9 must not respond to ICMP echo requests sent to a broadcast
+  # address. This reduces exposure to broadcast-amplification attacks.
+  - name: net.ipv4.icmp_echo_ignore_broadcasts
+    value: "1"
+    file: "{{ sysctl_conf_network }}"
+    stig: "RHEL-09-253055"
+
+  # RHEL 9 must ignore IPv4 ICMP redirect messages. ICMP redirects can alter
+  # a host route table and are unauthenticated; an illicit redirect can enable
+  # a man-in-the-middle attack.
+  - name: net.ipv4.conf.all.accept_redirects
+    value: "0"
+    file: "{{ sysctl_conf_network }}"
+    stig: "RHEL-09-253015"
+
+  # RHEL 9 must prevent IPv4 ICMP redirect messages from being accepted by
+  # default on newly created network interfaces.
+  - name: net.ipv4.conf.default.accept_redirects
+    value: "0"
+    file: "{{ sysctl_conf_network }}"
+    stig: "RHEL-09-253040"
+
+  # RHEL 9 must not send IPv4 ICMP redirects. A host should not advertise
+  # alternative routes unless it is intentionally operating as a router.
+  - name: net.ipv4.conf.all.send_redirects
+    value: "0"
+    file: "{{ sysctl_conf_network }}"
+    stig: "RHEL-09-253065"
+
+  # RHEL 9 must not allow newly created interfaces to send IPv4 ICMP
+  # redirects by default.
+  - name: net.ipv4.conf.default.send_redirects
+    value: "0"
+    file: "{{ sysctl_conf_network }}"
+    stig: "RHEL-09-253070"
+
+  # RHEL 9 must not forward IPv4 source-routed packets. Source routing can
+  # be used to bypass network security controls by suggesting routing paths.
+  - name: net.ipv4.conf.all.accept_source_route
+    value: "0"
+    file: "{{ sysctl_conf_network }}"
+    stig: "RHEL-09-253020"
+
+  # RHEL 9 must not forward IPv4 source-routed packets by default on newly
+  # created network interfaces.
+  - name: net.ipv4.conf.default.accept_source_route
+    value: "0"
+    file: "{{ sysctl_conf_network }}"
+    stig: "RHEL-09-253045"
+
+  # RHEL 9 must not accept IPv6 router advertisements on existing
+  # interfaces unless the system is an IPv6 router.
+  #
+  # This can prevent IPv6 SLAAC configuration. Keep disabled only where
+  # static IPv6 configuration or no IPv6 networking is intended.
+  - name: net.ipv6.conf.all.accept_ra
+    value: "0"
+    file: "{{ sysctl_conf_network }}"
+    stig: "RHEL-09-254010"
+
+  # RHEL 9 must not accept IPv6 router advertisements by default on newly
+  # created interfaces unless the system is an IPv6 router.
+  - name: net.ipv6.conf.default.accept_ra
+    value: "0"
+    file: "{{ sysctl_conf_network }}"
+    stig: "RHEL-09-254030"
+
+  # RHEL 9 must not enable IPv6 packet forwarding unless the system is an
+  # IPv6 router.
+  - name: net.ipv6.conf.all.forwarding
+    value: "0"
+    file: "{{ sysctl_conf_network }}"
+    stig: "RHEL-09-254025"
+
+  # RHEL 9 must not forward IPv6 source-routed packets. Source-routed
+  # packets can be used to bypass network security measures.
+  - name: net.ipv6.conf.all.accept_source_route
+    value: "0"
+    file: "{{ sysctl_conf_network }}"
+    stig: "RHEL-09-254020"
+
+  # RHEL 9 must not forward IPv6 source-routed packets by default on newly
+  # created network interfaces.
+  - name: net.ipv6.conf.default.accept_source_route
+    value: "0"
+    file: "{{ sysctl_conf_network }}"
+    stig: "RHEL-09-254040"
+
+  # RHEL 9 must ignore IPv6 ICMP redirect messages. An illicit redirect can
+  # modify routing behavior and enable a man-in-the-middle attack.
+  - name: net.ipv6.conf.all.accept_redirects
+    value: "0"
+    file: "{{ sysctl_conf_network }}"
+    stig: "RHEL-09-254015"
+
+  # RHEL 9 must prevent IPv6 ICMP redirect messages from being accepted by
+  # default on newly created network interfaces.
+  - name: net.ipv6.conf.default.accept_redirects
+    value: "0"
+    file: "{{ sysctl_conf_network }}"
+    stig: "RHEL-09-254035"
+
+  # RHEL 9 must disable the use of unprivileged user namespaces. User
+  # namespaces can expand the attack surface available to unprivileged users.
+  #
+  # This is a breaking change for rootless Podman/Docker, some sandboxing
+  # tools, and workloads that intentionally rely on user namespaces.
+  - name: user.max_user_namespaces
+    value: "0"
+    file: "{{ sysctl_conf_user }}"
+    stig: "RHEL-09-213105"

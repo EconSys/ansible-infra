@@ -11,5 +11,8 @@
 - name: Configure logging
   ansible.builtin.import_playbook: playbooks/configure_logging.yml
 
+- name: Configure sysctl hardening
+  ansible.builtin.import_playbook: playbooks/configure_sysctl.yml
+
 - name: Cleanup
   ansible.builtin.import_playbook: playbooks/cleanup.yml

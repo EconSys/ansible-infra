@@ -1,0 +1,8 @@
+- name: Configure sysctl parameters
+  ansible.builtin.import_tasks: configure.yml
+
+- name: Apply complete sysctl policy before AMI finalization
+  ansible.builtin.meta: flush_handlers
+
+- name: Validate sysctl configurations
+  ansible.builtin.import_tasks: validate.yml

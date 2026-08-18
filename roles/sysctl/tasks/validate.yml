@@ -1,0 +1,35 @@
+---
+- name: Read current sysctl values
+  ansible.builtin.command:
+    argv:
+      - /sbin/sysctl
+      - -n
+      - "{{ sysctl_param.name }}"
+  loop: "{{ sysctl_params }}"
+  loop_control:
+    loop_var: sysctl_param
+    label: "{{ sysctl_param.name }}"
+  register: sysctl_runtime_values
+  changed_when: false
+  failed_when: false
+
+- name: Assert sysctl values match configured hardening
+  ansible.builtin.assert:
+    that:
+      - sysctl_runtime_value.rc == 0
+      - (sysctl_runtime_value.stdout | trim) == sysctl_runtime_value.sysctl_param.value
+    fail_msg: >-
+      Sysctl validation failed for {{ sysctl_runtime_value.sysctl_param.name }}.
+
+      Expected: {{ sysctl_runtime_value.sysctl_param.value }}
+      Actual: {{ sysctl_runtime_value.stdout | default('<unavailable>', true) | trim }}
+
+      Return code: {{ sysctl_runtime_value.rc }}
+
+      stderr:
+      {{ sysctl_runtime_value.stderr | default('') | trim }}
+    quiet: true
+  loop: "{{ sysctl_runtime_values.results }}"
+  loop_control:
+    loop_var: sysctl_runtime_value
+    label: "{{ sysctl_runtime_value.sysctl_param.name }}"

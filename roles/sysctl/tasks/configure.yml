@@ -1,0 +1,18 @@
+---
+- name: Apply sysctl kernel DISA-STIG hardening
+  ansible.posix.sysctl:
+    name: "{{ sysctl_param.name }}"
+    value: "{{ sysctl_param.value }}"
+    state: present
+    sysctl_file: "{{ sysctl_param.file }}"
+    sysctl_set: true
+    reload: false
+  loop: "{{ sysctl_params }}"
+  loop_control:
+    loop_var: sysctl_param
+    label: >-
+      {{ sysctl_param.name }}={{ sysctl_param.value }}
+      {{ '[%s]' | format(sysctl_param.stig) if sysctl_param.stig | default('', true) else '' }}
+  notify: Reload sysctl
+  tags:
+    - DISA-STIG
