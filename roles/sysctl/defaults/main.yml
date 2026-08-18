@@ -143,6 +143,13 @@ sysctl_params:
     file: "{{ sysctl_conf_network }}"
     stig: "RHEL-09-253045"
 
+  # RHEL 9 must not enable IPv4 packet forwarding unless the system is an
+  # IPv4 router.
+  - name: net.ipv4.conf.all.forwarding
+    value: "0"
+    file: "{{ sysctl_conf_network }}"
+    stig: "RHEL-09-253075"
+
   # RHEL 9 must not accept IPv6 router advertisements on existing
   # interfaces unless the system is an IPv6 router.
   #
