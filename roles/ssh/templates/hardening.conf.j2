@@ -116,7 +116,7 @@ AuthorizedKeysFile %h/.ssh/authorized_keys
 # ============
 
 # Ciphers
-Ciphers {{ ssh_ciphers | join(', ') }}
+Ciphers {{ ssh_ciphers | join(',') }}
 # MAC (Message Authentication Code) algorithms
 MACs {{ ssh_macs | join(',') }}
 # KEX (Key Exchange) algorithms
