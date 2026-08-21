@@ -13,6 +13,7 @@ ssh_host_keys:
   - "/etc/ssh/ssh_host_rsa_key"
 
 ssh_authorized_keys_command: "/usr/bin/timeout 5s /usr/local/bin/ssh-keyldap %u %f"
+ssh_authorized_keys_command_user: nobody
 
 ssh_syslog_facility: AUTHPRIV
 # QUIET, FATAL, ERROR, INFO, VERBOSE, DEBUG, DEBUG1, DEBUG2,DEBUG3

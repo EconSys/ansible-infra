@@ -106,6 +106,7 @@ AllowGroups {{ ssh_allow_groups | join(' ') }}
 
 {% if ssh_authorized_keys_command %}
 AuthorizedKeysCommand {{ ssh_authorized_keys_command }}
+AuthorizedKeysCommandUser {{ ssh_authorized_keys_command_user }}
 {% endif %}
 
 # The default is to check both .ssh/authorized_keys and .ssh/authorized_keys2
