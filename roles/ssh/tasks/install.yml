@@ -1,0 +1,23 @@
+- name: Install openssh
+  ansible.builtin.dnf:
+    name: openssh
+    state: present
+    disable_gpg_check: false
+
+- name: Install openssh-clients
+  ansible.builtin.dnf:
+    name: openssh-clients
+    state: present
+    disable_gpg_check: false
+
+- name: Install openssh-server
+  ansible.builtin.dnf:
+    name: openssh-server
+    state: present
+    disable_gpg_check: false
+
+- name: Enable and start openssh
+  ansible.builtin.systemd_service:
+    name: sshd.service
+    state: started
+    enabled: true

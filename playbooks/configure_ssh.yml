@@ -1,0 +1,7 @@
+---
+- name: Configure ssh
+  hosts: local_host
+  become: true
+
+  roles:
+    - role: ssh

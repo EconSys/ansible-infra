@@ -2,7 +2,7 @@
 - name: Install base packages and set environment variables
   ansible.builtin.import_playbook: playbooks/install_prerequisites.yml
 
-- name: Configure chronyd
+- name: Configure chrony time synchronization
   ansible.builtin.import_playbook: playbooks/configure_chrony.yml
 
 - name: Configure Bash profile
@@ -10,6 +10,9 @@
 
 - name: Configure logging
   ansible.builtin.import_playbook: playbooks/configure_logging.yml
+
+- name: Configure ssh
+  ansible.builtin.import_playbook: playbooks/configure_ssh.yml
 
 - name: Configure sysctl hardening
   ansible.builtin.import_playbook: playbooks/configure_sysctl.yml

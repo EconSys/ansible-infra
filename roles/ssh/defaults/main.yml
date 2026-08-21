@@ -1,0 +1,70 @@
+ssh_port: 22
+# add '::' to include IPv6 address
+ssh_listen_addresses:
+  - '0.0.0.0'
+# set to 'any' to include IPv6 family
+ssh_address_family: inet
+
+ssh_authentication_methods:
+  - publickey
+
+ssh_host_keys:
+  - "/etc/ssh/ssh_host_ecdsa_key"
+  - "/etc/ssh/ssh_host_rsa_key"
+
+ssh_authorized_keys_command: "/usr/bin/timeout 5s /usr/local/bin/ssh-keyldap %u %f"
+
+ssh_syslog_facility: AUTHPRIV
+# QUIET, FATAL, ERROR, INFO, VERBOSE, DEBUG, DEBUG1, DEBUG2,DEBUG3
+ssh_log_level: INFO
+
+ssh_ciphers:
+  - "aes256-gcm@openssh.com"
+  - "aes256-ctr"
+
+ssh_macs:
+  - "hmac-sha2-256"
+  - "hmac-sha2-512"
+
+ssh_kex_algorithms:
+  # - "curve25519-sha256"
+  # - "curve25519-sha256@libssh.org"
+  - "diffie-hellman-group16-sha512"
+  - "diffie-hellman-group18-sha512"
+  # - "diffie-hellman-group-exchange-sha256"
+  - "ecdh-sha2-nistp384"
+  - "ecdh-sha2-nistp521"
+
+ssh_host_key_algorithms:
+  - "ssh-rsa-cert-v01@openssh.com"
+  - "rsa-sha2-512-cert-v01@openssh.com"
+  # - "rsa-sha2-256-cert-v01@openssh.com"
+  # - "ecdsa-sha2-nistp256-cert-v01@openssh.com"
+  - "ecdsa-sha2-nistp384-cert-v01@openssh.com"
+  - "ecdsa-sha2-nistp521-cert-v01@openssh.com"
+  # - "ecdsa-sha2-nistp256"
+  - "ecdsa-sha2-nistp384"
+  - "ecdsa-sha2-nistp521"
+
+ssh_rekey_limit_stig:
+  - 1G
+  - 1h
+ssh_client_alive_interval_stig: 300
+ssh_client_alive_count_max_stig: 2
+
+ssh_rekey_limit_packer:
+  - default
+  - none
+ssh_client_alive_interval_packer: 600
+# disable automatic disconnect for Packer builds over SSH
+ssh_client_alive_count_max_packer: 0
+
+ssh_login_grace_time: 60
+ssh_max_auth_tries: 3
+ssh_max_sessions: 3
+ssh_max_startups: "10:30:60"
+
+ssh_accept_env:
+  - LANG
+  - LANGUAGE
+  - LC_*

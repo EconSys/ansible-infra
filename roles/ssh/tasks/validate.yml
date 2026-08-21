@@ -1,0 +1,31 @@
+- name: Get current SSH daemon configuration
+  ansible.builtin.command:
+    cmd: sshd -T
+  register: ssh_current_config
+  changed_when: false
+
+- name: Collect TCP listeners on SSH port
+  ansible.builtin.command:
+    argv:
+      - ss
+      - -H
+      - -ltn
+      - "sport = :{{ ssh_port }}"
+  register: ssh_listeners
+  changed_when: false
+
+- name: Assert TCP listener exists on port 22
+  ansible.builtin.assert:
+    that:
+      - ssh_listeners.stdout | trim | length > 0
+    fail_msg: >-
+      No TCP listener was found on port 22. Check sshd.service status,
+      sshd configuration, and journal logs.
+
+- name: Assert SSH is accepting local IPv4 TCP connections
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ ssh_port }}"
+    state: started
+    connect_timeout: 3
+    timeout: 10

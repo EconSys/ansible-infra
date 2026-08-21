@@ -1,0 +1,8 @@
+- name: Install openssh packages
+  ansible.builtin.import_tasks: install.yml
+
+- name: Configure ssh
+  ansible.builtin.import_tasks: configure.yml
+
+- name: Validate ssh configurations
+  ansible.builtin.import_tasks: validate.yml

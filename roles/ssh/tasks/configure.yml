@@ -1,0 +1,70 @@
+- name: Ensure sshd drop-in directory exists
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
+
+- name: Install sshd hardening policy
+  ansible.builtin.template:
+    src: hardening.conf.j2
+    dest: /etc/ssh/sshd_config.d/60-hardening.conf
+    owner: root
+    group: root
+    mode: "0600"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
+    validate: "/usr/sbin/sshd -t -f %s"
+  notify: Reload sshd
+
+- name: Ensure cloud configuration drop-in directory exists
+  ansible.builtin.file:
+    path: /etc/cloud/cloud.cfg.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
+
+- name: Install cloud-init SSH host-key policy
+  ansible.builtin.copy:
+    src: ssh_host_key_types.cfg
+    dest: /etc/cloud/cloud.cfg.d/60_ssh_host_key_types.cfg
+    owner: root
+    group: root
+    mode: "0644"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
+
+- name: Disable MOTD
+  community.general.pamd:
+    name: sshd
+    type: session
+    control: optional
+    module_path: pam_motd.so
+    state: absent
+    backup: true
+
+- name: Install banner
+  ansible.builtin.copy:
+    src: issue.net
+    dest: /etc/issue.net
+    owner: root
+    group: root
+    mode: "0644"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default

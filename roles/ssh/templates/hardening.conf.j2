@@ -1,0 +1,160 @@
+# Managed by Ansible - do not edit manually
+# This is the sshd server system-wide configuration file.
+# See sshd_config(5) for more information.
+
+# Network
+# =======
+
+# TCP port sshd should listen on
+Port {{ ssh_port }}
+
+# Address family should always be limited to the active network configuration.
+AddressFamily {{ ssh_address_family }}
+
+# Addresses sshd listens on.
+{% for address in ssh_listen_addresses %}
+ListenAddress {{ address }}
+{% endfor %}
+
+# Session
+# =======
+
+{# Disable TCP-level keepalives.
+Use SSH-level ClientAlive messages to detect inactive/unresponsive clients. #}
+TCPKeepAlive no
+
+{# Maximum amount of data that may be transmitted before the session key is rekeyed,
+   optionally followed by the maximum amount of time that may pass before rekeying. #}
+RekeyLimit {{ ssh_rekey_limit_stig | join(' ') }}
+
+{# Send a keep-alive message to the client every n seconds. #}
+ClientAliveInterval {{ ssh_client_alive_interval_stig }}
+{# Disconnect after this many consecutive unanswered messages. #}
+ClientAliveCountMax {{ ssh_client_alive_count_max_stig }}
+
+# disable DNS lookup
+UseDNS no
+
+# Forwarding
+# ==========
+
+# disable tunneling
+PermitTunnel no
+
+# disallow remote hosts from connecting to ports forwarded for the client
+GatewayPorts no
+
+{# # disable TCP connection forwarding
+AllowTcpForwarding no
+
+# disable SSH agent forwarding
+AllowAgentForwarding no #}
+
+# disable X11 forwarding
+X11Forwarding no
+X11UseLocalhost yes
+
+# Authentication
+# ==============
+
+# Enable PAM to enforce system wide rules.
+# WARNING: 'UsePAM false' is not supported in Red Hat Enterprise Linux
+# and may cause several problems.
+UsePAM yes
+
+PermitRootLogin no
+
+# Require public key authentication
+AuthenticationMethods {{ ssh_authentication_methods | join(',') }}
+# Enable public key authentication
+PubkeyAuthentication yes
+
+# Disable password-based authentication, it can allow for potentially easier brute-force attacks.
+PasswordAuthentication no
+PermitEmptyPasswords no
+
+# disable host-based authentication, it can be exploited.
+HostbasedAuthentication no
+# ignore system-wide legacy trust files
+IgnoreRhosts yes
+IgnoreUserKnownHosts yes
+
+# disable GSSAPI and Kerberos authentications
+GSSAPIAuthentication no
+KerberosAuthentication no
+
+# disable keyboard-interactive authentication
+KbdInteractiveAuthentication no
+
+# disconnect if authentication is not completed within this amount of time
+LoginGraceTime {{ ssh_login_grace_time }}
+# maximum number of authentication attempts permitted per connection
+MaxAuthTries {{ ssh_max_auth_tries }}
+# maximum number of open sessions permitted per network connection
+MaxSessions {{ ssh_max_sessions }}
+# maximum number of concurrent unauthenticated connections to the SSH daemon
+MaxStartups {{ ssh_max_startups }}
+
+# Host Keys
+{% for key in ssh_host_keys %}
+HostKey {{ key }}
+{% endfor %}
+
+# Access Control
+# ==============
+AllowGroups {{ ssh_allow_groups | join(' ') }}
+
+{% if ssh_authorized_keys_command %}
+AuthorizedKeysCommand {{ ssh_authorized_keys_command }}
+{% endif %}
+
+# The default is to check both .ssh/authorized_keys and .ssh/authorized_keys2
+# but this is overridden so installations will only check .ssh/authorized_keys
+AuthorizedKeysFile %h/.ssh/authorized_keys
+
+# Cryptography
+# ============
+
+# Ciphers
+Ciphers {{ ssh_ciphers | join(', ') }}
+# MAC (Message Authentication Code) algorithms
+MACs {{ ssh_macs | join(',') }}
+# KEX (Key Exchange) algorithms
+KexAlgorithms {{ ssh_kex_algorithms | join(',') }}
+
+# SSH Host key algorithms
+HostKeyAlgorithms {{ ssh_host_key_algorithms | join(',') }}
+
+# Environment
+# ===========
+
+# prevent users from altering environment variables
+PermitUserEnvironment no
+
+# environment variables sent by the client that will be copied into the session
+AcceptEnv {{ ssh_accept_env | join(' ') }}
+
+# Logging
+# =======
+
+SyslogFacility {{ ssh_syslog_facility }}
+LogLevel {{ ssh_log_level }}
+
+# Specifies whether sshd should print the last user login when a user logs in interactively
+PrintLastLog yes
+
+# Security configuration
+# ======================
+
+# Make sure sshd checks file modes and ownership before accepting logins. This prevents accidental misconfiguration.
+StrictModes yes
+
+# Misc. configuration
+# ===================
+
+Compression no
+
+# login banner
+Banner /etc/issue.net
+# disable MOTD
+PrintMotd no
