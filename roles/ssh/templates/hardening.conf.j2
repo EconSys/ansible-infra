@@ -25,12 +25,18 @@ TCPKeepAlive no
 
 {# Maximum amount of data that may be transmitted before the session key is rekeyed,
    optionally followed by the maximum amount of time that may pass before rekeying. #}
-RekeyLimit {{ ssh_rekey_limit_stig | join(' ') }}
+RekeyLimit {{ ssh_rekey_limit | join(' ') }}
 
-{# Send a keep-alive message to the client every n seconds. #}
-ClientAliveInterval {{ ssh_client_alive_interval_stig }}
+{# Send a keep-alive message to the client every `n` seconds. #}
+ClientAliveInterval {{ ssh_client_alive_interval }}
+
 {# Disconnect after this many consecutive unanswered messages. #}
-ClientAliveCountMax {{ ssh_client_alive_count_max_stig }}
+{% if is_golden_ami %}
+ClientAliveCountMax {{ ssh_client_alive_count_max }}
+{% else %}
+# disable automatic disconnect for Packer builds over SSH
+ClientAliveCountMax {{ ssh_client_alive_count_max_packer }}
+{% endif %}
 
 # disable DNS lookup
 UseDNS no

@@ -2,6 +2,8 @@
 - name: Configure ssh
   hosts: local_host
   become: true
+  vars:
+    is_golden_ami: false
 
   roles:
     - role: ssh

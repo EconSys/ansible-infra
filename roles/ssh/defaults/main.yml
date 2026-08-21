@@ -47,17 +47,12 @@ ssh_host_key_algorithms:
   - "ecdsa-sha2-nistp384"
   - "ecdsa-sha2-nistp521"
 
-ssh_rekey_limit_stig:
+ssh_rekey_limit:
   - 1G
   - 1h
-ssh_client_alive_interval_stig: 300
-ssh_client_alive_count_max_stig: 2
+ssh_client_alive_interval: 300
+ssh_client_alive_count_max: 2
 
-ssh_rekey_limit_packer:
-  - default
-  - none
-ssh_client_alive_interval_packer: 600
-# disable automatic disconnect for Packer builds over SSH
 ssh_client_alive_count_max_packer: 0
 
 ssh_login_grace_time: 60
