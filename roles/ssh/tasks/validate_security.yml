@@ -1,0 +1,150 @@
+---
+# SSH daemon security hardening configurations
+- name: Get current SSH daemon configuration
+  ansible.builtin.command:
+    cmd: sshd -T
+  register: ssh_current_config
+  changed_when: false
+
+- name: Parse SSH daemon configuration
+  ansible.builtin.set_fact:
+    ssh_settings: >-
+      {{ dict(ssh_current_config.stdout_lines | map('split', ' ', 1)) }}
+
+- name: Validate PasswordAuthentication
+  ansible.builtin.assert:
+    that:
+      - ssh_settings.passwordauthentication == "no"
+    fail_msg: >-
+      PasswordAuthentication is "{{ ssh_settings.passwordauthentication }}";
+      expected "no".
+    success_msg: >-
+      PasswordAuthentication={{ ssh_settings.passwordauthentication }}
+
+- name: Validate MaxAuthTries
+  ansible.builtin.assert:
+    that:
+      - ssh_settings.maxauthtries == (ssh_max_auth_tries | string)
+    fail_msg: >-
+      MaxAuthTries is "{{ ssh_settings.maxauthtries }}"; expected
+      "{{ ssh_max_auth_tries }}".
+    success_msg: >-
+      MaxAuthTries={{ ssh_settings.maxauthtries }}
+
+- name: Validate LoginGraceTime
+  ansible.builtin.assert:
+    that:
+      - ssh_settings.logingracetime == (ssh_login_grace_time | string)
+    fail_msg: >-
+      LoginGraceTime is "{{ ssh_settings.logingracetime }}"; expected
+      "{{ ssh_login_grace_time }}".
+    success_msg: >-
+      LoginGraceTime={{ ssh_settings.logingracetime }}
+
+- name: Validate MaxSessions
+  ansible.builtin.assert:
+    that:
+      - ssh_settings.maxsessions == (ssh_max_sessions | string)
+    fail_msg: >-
+      MaxSessions is "{{ ssh_settings.maxsessions }}"; expected
+      "{{ ssh_max_sessions }}".
+    success_msg: >-
+      MaxSessions={{ ssh_settings.maxsessions }}
+
+- name: Validate MaxStartups
+  ansible.builtin.assert:
+    that:
+      - ssh_settings.maxstartups == ssh_max_startups
+    fail_msg: >-
+      MaxStartups is "{{ ssh_settings.maxstartups }}"; expected
+      "{{ ssh_max_startups }}".
+    success_msg: >-
+      MaxStartups={{ ssh_settings.maxstartups }}
+
+- name: Validate AllowGroups
+  ansible.builtin.assert:
+    that:
+      - ssh_settings.allowgroups == (ssh_allow_groups | join(' '))
+    fail_msg: >-
+      AllowGroups is "{{ ssh_settings.allowgroups }}"; expected
+      "{{ ssh_allow_groups | join(' ') }}".
+    success_msg: >-
+      AllowGroups={{ ssh_settings.allowgroups }}
+
+- name: Validate PermitTunnel
+  ansible.builtin.assert:
+    that:
+      - ssh_settings.permittunnel == "no"
+    fail_msg: >-
+      PermitTunnel is "{{ ssh_settings.permittunnel }}"; expected "no".
+    success_msg: >-
+      PermitTunnel={{ ssh_settings.permittunnel }}
+
+- name: Validate GatewayPorts
+  ansible.builtin.assert:
+    that:
+      - ssh_settings.gatewayports == "no"
+    fail_msg: >-
+      GatewayPorts is "{{ ssh_settings.gatewayports }}"; expected "no".
+    success_msg: >-
+      GatewayPorts={{ ssh_settings.gatewayports }}
+
+- name: Validate AllowTcpForwarding
+  ansible.builtin.assert:
+    that:
+      - ssh_settings.allowtcpforwarding == "no"
+    fail_msg: >-
+      AllowTcpForwarding is "{{ ssh_settings.allowtcpforwarding }}";
+      expected "no".
+    success_msg: >-
+      AllowTcpForwarding={{ ssh_settings.allowtcpforwarding }}
+
+- name: Validate AllowAgentForwarding
+  ansible.builtin.assert:
+    that:
+      - ssh_settings.allowagentforwarding == "no"
+    fail_msg: >-
+      AllowAgentForwarding is "{{ ssh_settings.allowagentforwarding }}";
+      expected "no".
+    success_msg: >-
+      AllowAgentForwarding={{ ssh_settings.allowagentforwarding }}
+
+- name: Validate SyslogFacility
+  ansible.builtin.assert:
+    that:
+      - ssh_settings.syslogfacility == ssh_syslog_facility
+    fail_msg: >-
+      SyslogFacility is "{{ ssh_settings.syslogfacility }}"; expected
+      "{{ ssh_syslog_facility }}".
+    success_msg: >-
+      SyslogFacility={{ ssh_settings.syslogfacility }}
+
+- name: Validate LogLevel
+  ansible.builtin.assert:
+    that:
+      - ssh_settings.loglevel == ssh_log_level
+    fail_msg: >-
+      LogLevel is "{{ ssh_settings.loglevel }}"; expected
+      "{{ ssh_log_level }}".
+    success_msg: >-
+      LogLevel={{ ssh_settings.loglevel }}
+
+- name: Validate AuthorizedKeysCommand
+  ansible.builtin.assert:
+    that:
+      - ssh_settings.authorizedkeyscommand == ssh_authorized_keys_command
+    fail_msg: >-
+      AuthorizedKeysCommand is "{{ ssh_settings.authorizedkeyscommand }}";
+      expected "{{ ssh_authorized_keys_command }}".
+    success_msg: >-
+      AuthorizedKeysCommand={{ ssh_settings.authorizedkeyscommand }}
+
+- name: Validate AuthorizedKeysFile
+  ansible.builtin.assert:
+    that:
+      - ssh_settings.authorizedkeysfile == "%h/.ssh/authorized_keys"
+    fail_msg: >-
+      AuthorizedKeysFile is "{{ ssh_settings.authorizedkeysfile }}";
+      expected "%h/.ssh/authorized_keys".
+    success_msg: >-
+      AuthorizedKeysFile={{ ssh_settings.authorizedkeysfile }}
