@@ -1,0 +1,15 @@
+---
+- name: Validate DISA STIG controls
+  hosts: local_host
+  become: true
+
+  tasks:
+    - name: Validate ssh DISA STIG controls
+      ansible.builtin.import_role:
+        name: ssh
+        tasks_from: validate_stig
+
+    - name: Validate sysctl DISA STIG controls
+      ansible.builtin.import_role:
+        name: sysctl
+        tasks_from: validate_stig
