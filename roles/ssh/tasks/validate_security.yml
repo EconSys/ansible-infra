@@ -8,12 +8,12 @@
 
 - name: Parse SSH daemon scalar configuration
   ansible.builtin.set_fact:
-    ssh_settings: >-
+    ssh_runtime: >-
       {{ dict(ssh_current_config.stdout_lines | map('split', ' ', 1)) }}
 
 - name: Parse SSH AllowGroups
   ansible.builtin.set_fact:
-    ssh_allow_groups_settings: >-
+    ssh_allow_groups_runtime: >-
       {{
         ssh_current_config.stdout_lines
         | select('match', '^allowgroups ')
@@ -23,7 +23,7 @@
 
 - name: Parse SSH HostKey
   ansible.builtin.set_fact:
-    ssh_host_keys_settings: >-
+    ssh_host_keys_runtime: >-
       {{
         ssh_current_config.stdout_lines
         | select('match', '^hostkey ')
@@ -34,162 +34,162 @@
 - name: Validate PasswordAuthentication
   ansible.builtin.assert:
     that:
-      - ssh_settings.passwordauthentication == "no"
+      - ssh_runtime.passwordauthentication == "no"
     fail_msg: >-
-      PasswordAuthentication is "{{ ssh_settings.passwordauthentication }}";
+      PasswordAuthentication is "{{ ssh_runtime.passwordauthentication }}";
       expected "no".
     success_msg: >-
-      PasswordAuthentication={{ ssh_settings.passwordauthentication }}
+      PasswordAuthentication={{ ssh_runtime.passwordauthentication }}
     quiet: true
 
 - name: Validate MaxAuthTries
   ansible.builtin.assert:
     that:
-      - ssh_settings.maxauthtries == (ssh_max_auth_tries | string)
+      - ssh_runtime.maxauthtries == (ssh_max_auth_tries | string)
     fail_msg: >-
-      MaxAuthTries is "{{ ssh_settings.maxauthtries }}"; expected
+      MaxAuthTries is "{{ ssh_runtime.maxauthtries }}"; expected
       "{{ ssh_max_auth_tries }}".
     success_msg: >-
-      MaxAuthTries={{ ssh_settings.maxauthtries }}
+      MaxAuthTries={{ ssh_runtime.maxauthtries }}
     quiet: true
 
 - name: Validate LoginGraceTime
   ansible.builtin.assert:
     that:
-      - ssh_settings.logingracetime == (ssh_login_grace_time | string)
+      - ssh_runtime.logingracetime == (ssh_login_grace_time | string)
     fail_msg: >-
-      LoginGraceTime is "{{ ssh_settings.logingracetime }}"; expected
+      LoginGraceTime is "{{ ssh_runtime.logingracetime }}"; expected
       "{{ ssh_login_grace_time }}".
     success_msg: >-
-      LoginGraceTime={{ ssh_settings.logingracetime }}
+      LoginGraceTime={{ ssh_runtime.logingracetime }}
     quiet: true
 
 - name: Validate MaxSessions
   ansible.builtin.assert:
     that:
-      - ssh_settings.maxsessions == (ssh_max_sessions | string)
+      - ssh_runtime.maxsessions == (ssh_max_sessions | string)
     fail_msg: >-
-      MaxSessions is "{{ ssh_settings.maxsessions }}"; expected
+      MaxSessions is "{{ ssh_runtime.maxsessions }}"; expected
       "{{ ssh_max_sessions }}".
     success_msg: >-
-      MaxSessions={{ ssh_settings.maxsessions }}
+      MaxSessions={{ ssh_runtime.maxsessions }}
     quiet: true
 
 - name: Validate MaxStartups
   ansible.builtin.assert:
     that:
-      - ssh_settings.maxstartups == ssh_max_startups
+      - ssh_runtime.maxstartups == ssh_max_startups
     fail_msg: >-
-      MaxStartups is "{{ ssh_settings.maxstartups }}"; expected
+      MaxStartups is "{{ ssh_runtime.maxstartups }}"; expected
       "{{ ssh_max_startups }}".
     success_msg: >-
-      MaxStartups={{ ssh_settings.maxstartups }}
+      MaxStartups={{ ssh_runtime.maxstartups }}
     quiet: true
 
 - name: Validate AllowGroups
   ansible.builtin.assert:
     that:
-      - ssh_allow_groups_settings == ssh_allow_groups
+      - ssh_allow_groups_runtime == ssh_allow_groups
     fail_msg: >-
-      AllowGroups is "{{ ssh_allow_groups_settings }}"; expected
+      AllowGroups is "{{ ssh_allow_groups_runtime }}"; expected
       "{{ ssh_allow_groups }}".
     success_msg: >-
-      AllowGroups={{ ssh_allow_groups_settings }}
+      AllowGroups={{ ssh_allow_groups_runtime }}
     quiet: true
 
 - name: Validate PermitTunnel
   ansible.builtin.assert:
     that:
-      - ssh_settings.permittunnel == "no"
+      - ssh_runtime.permittunnel == "no"
     fail_msg: >-
-      PermitTunnel is "{{ ssh_settings.permittunnel }}"; expected "no".
+      PermitTunnel is "{{ ssh_runtime.permittunnel }}"; expected "no".
     success_msg: >-
-      PermitTunnel={{ ssh_settings.permittunnel }}
+      PermitTunnel={{ ssh_runtime.permittunnel }}
     quiet: true
 
 - name: Validate GatewayPorts
   ansible.builtin.assert:
     that:
-      - ssh_settings.gatewayports == "no"
+      - ssh_runtime.gatewayports == "no"
     fail_msg: >-
-      GatewayPorts is "{{ ssh_settings.gatewayports }}"; expected "no".
+      GatewayPorts is "{{ ssh_runtime.gatewayports }}"; expected "no".
     success_msg: >-
-      GatewayPorts={{ ssh_settings.gatewayports }}
+      GatewayPorts={{ ssh_runtime.gatewayports }}
     quiet: true
 
 # - name: Validate AllowTcpForwarding
 #   ansible.builtin.assert:
 #     that:
-#       - ssh_settings.allowtcpforwarding == "no"
+#       - ssh_runtime.allowtcpforwarding == "no"
 #     fail_msg: >-
-#       AllowTcpForwarding is "{{ ssh_settings.allowtcpforwarding }}";
+#       AllowTcpForwarding is "{{ ssh_runtime.allowtcpforwarding }}";
 #       expected "no".
 #     success_msg: >-
-#       AllowTcpForwarding={{ ssh_settings.allowtcpforwarding }}
+#       AllowTcpForwarding={{ ssh_runtime.allowtcpforwarding }}
 #     quiet: true
 
 # - name: Validate AllowAgentForwarding
 #   ansible.builtin.assert:
 #     that:
-#       - ssh_settings.allowagentforwarding == "no"
+#       - ssh_runtime.allowagentforwarding == "no"
 #     fail_msg: >-
-#       AllowAgentForwarding is "{{ ssh_settings.allowagentforwarding }}";
+#       AllowAgentForwarding is "{{ ssh_runtime.allowagentforwarding }}";
 #       expected "no".
 #     success_msg: >-
-#       AllowAgentForwarding={{ ssh_settings.allowagentforwarding }}
+#       AllowAgentForwarding={{ ssh_runtime.allowagentforwarding }}
 #     quiet: true
 
 - name: Validate SyslogFacility
   ansible.builtin.assert:
     that:
-      - ssh_settings.syslogfacility == ssh_syslog_facility
+      - ssh_runtime.syslogfacility == ssh_syslog_facility
     fail_msg: >-
-      SyslogFacility is "{{ ssh_settings.syslogfacility }}"; expected
+      SyslogFacility is "{{ ssh_runtime.syslogfacility }}"; expected
       "{{ ssh_syslog_facility }}".
     success_msg: >-
-      SyslogFacility={{ ssh_settings.syslogfacility }}
+      SyslogFacility={{ ssh_runtime.syslogfacility }}
     quiet: true
 
 - name: Validate LogLevel
   ansible.builtin.assert:
     that:
-      - ssh_settings.loglevel == ssh_log_level
+      - ssh_runtime.loglevel == ssh_log_level
     fail_msg: >-
-      LogLevel is "{{ ssh_settings.loglevel }}"; expected
+      LogLevel is "{{ ssh_runtime.loglevel }}"; expected
       "{{ ssh_log_level }}".
     success_msg: >-
-      LogLevel={{ ssh_settings.loglevel }}
+      LogLevel={{ ssh_runtime.loglevel }}
     quiet: true
 
 - name: Validate AuthorizedKeysCommand
   ansible.builtin.assert:
     that:
-      - ssh_settings.authorizedkeyscommand == ssh_authorized_keys_command
+      - ssh_runtime.authorizedkeyscommand == ssh_authorized_keys_command
     fail_msg: >-
-      AuthorizedKeysCommand is "{{ ssh_settings.authorizedkeyscommand }}";
+      AuthorizedKeysCommand is "{{ ssh_runtime.authorizedkeyscommand }}";
       expected "{{ ssh_authorized_keys_command }}".
     success_msg: >-
-      AuthorizedKeysCommand={{ ssh_settings.authorizedkeyscommand }}
+      AuthorizedKeysCommand={{ ssh_runtime.authorizedkeyscommand }}
     quiet: true
 
 - name: Validate AuthorizedKeysFile
   ansible.builtin.assert:
     that:
-      - ssh_settings.authorizedkeysfile == "%h/.ssh/authorized_keys"
+      - ssh_runtime.authorizedkeysfile == "%h/.ssh/authorized_keys"
     fail_msg: >-
-      AuthorizedKeysFile is "{{ ssh_settings.authorizedkeysfile }}";
+      AuthorizedKeysFile is "{{ ssh_runtime.authorizedkeysfile }}";
       expected "%h/.ssh/authorized_keys".
     success_msg: >-
-      AuthorizedKeysFile={{ ssh_settings.authorizedkeysfile }}
+      AuthorizedKeysFile={{ ssh_runtime.authorizedkeysfile }}
     quiet: true
 
 - name: Validate HostKey
   ansible.builtin.assert:
     that:
-      - ssh_host_keys_settings.hostkey == ssh_host_keys
+      - ssh_host_keys_runtime == ssh_host_keys
     fail_msg: >-
-      HostKey is "{{ ssh_host_keys_settings.hostkey }}";
+      HostKey is "{{ ssh_host_keys_runtime }}";
       expected ssh_host_keys.
     success_msg: >-
-      HostKey={{ ssh_host_keys_settings.hostkey }}
+      HostKey={{ ssh_host_keys_runtime }}
     quiet: true
