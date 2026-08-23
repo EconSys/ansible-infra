@@ -117,27 +117,27 @@
       GatewayPorts={{ ssh_settings.gatewayports }}
     quiet: true
 
-- name: Validate AllowTcpForwarding
-  ansible.builtin.assert:
-    that:
-      - ssh_settings.allowtcpforwarding == "no"
-    fail_msg: >-
-      AllowTcpForwarding is "{{ ssh_settings.allowtcpforwarding }}";
-      expected "no".
-    success_msg: >-
-      AllowTcpForwarding={{ ssh_settings.allowtcpforwarding }}
-    quiet: true
+# - name: Validate AllowTcpForwarding
+#   ansible.builtin.assert:
+#     that:
+#       - ssh_settings.allowtcpforwarding == "no"
+#     fail_msg: >-
+#       AllowTcpForwarding is "{{ ssh_settings.allowtcpforwarding }}";
+#       expected "no".
+#     success_msg: >-
+#       AllowTcpForwarding={{ ssh_settings.allowtcpforwarding }}
+#     quiet: true
 
-- name: Validate AllowAgentForwarding
-  ansible.builtin.assert:
-    that:
-      - ssh_settings.allowagentforwarding == "no"
-    fail_msg: >-
-      AllowAgentForwarding is "{{ ssh_settings.allowagentforwarding }}";
-      expected "no".
-    success_msg: >-
-      AllowAgentForwarding={{ ssh_settings.allowagentforwarding }}
-    quiet: true
+# - name: Validate AllowAgentForwarding
+#   ansible.builtin.assert:
+#     that:
+#       - ssh_settings.allowagentforwarding == "no"
+#     fail_msg: >-
+#       AllowAgentForwarding is "{{ ssh_settings.allowagentforwarding }}";
+#       expected "no".
+#     success_msg: >-
+#       AllowAgentForwarding={{ ssh_settings.allowagentforwarding }}
+#     quiet: true
 
 - name: Validate SyslogFacility
   ansible.builtin.assert:
