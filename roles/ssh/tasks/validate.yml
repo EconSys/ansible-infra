@@ -1,5 +1,8 @@
 - name: Validate security hardening policies
   ansible.builtin.import_tasks: validate_security.yml
 
+- name: Validate STIG
+  ansible.builtin.import_tasks: validate_stig.yml
+
 - name: Validate ssh connections
   ansible.builtin.import_tasks: validate_connection.yml
