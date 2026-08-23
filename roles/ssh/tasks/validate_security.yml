@@ -20,6 +20,7 @@
       expected "no".
     success_msg: >-
       PasswordAuthentication={{ ssh_settings.passwordauthentication }}
+    quiet: true
 
 - name: Validate MaxAuthTries
   ansible.builtin.assert:
@@ -30,6 +31,7 @@
       "{{ ssh_max_auth_tries }}".
     success_msg: >-
       MaxAuthTries={{ ssh_settings.maxauthtries }}
+    quiet: true
 
 - name: Validate LoginGraceTime
   ansible.builtin.assert:
@@ -40,6 +42,7 @@
       "{{ ssh_login_grace_time }}".
     success_msg: >-
       LoginGraceTime={{ ssh_settings.logingracetime }}
+    quiet: true
 
 - name: Validate MaxSessions
   ansible.builtin.assert:
@@ -50,6 +53,7 @@
       "{{ ssh_max_sessions }}".
     success_msg: >-
       MaxSessions={{ ssh_settings.maxsessions }}
+    quiet: true
 
 - name: Validate MaxStartups
   ansible.builtin.assert:
@@ -60,6 +64,7 @@
       "{{ ssh_max_startups }}".
     success_msg: >-
       MaxStartups={{ ssh_settings.maxstartups }}
+    quiet: true
 
 - name: Validate AllowGroups
   ansible.builtin.assert:
@@ -70,6 +75,7 @@
       "{{ ssh_allow_groups | join(' ') }}".
     success_msg: >-
       AllowGroups={{ ssh_settings.allowgroups }}
+    quiet: true
 
 - name: Validate PermitTunnel
   ansible.builtin.assert:
@@ -79,6 +85,7 @@
       PermitTunnel is "{{ ssh_settings.permittunnel }}"; expected "no".
     success_msg: >-
       PermitTunnel={{ ssh_settings.permittunnel }}
+    quiet: true
 
 - name: Validate GatewayPorts
   ansible.builtin.assert:
@@ -88,6 +95,7 @@
       GatewayPorts is "{{ ssh_settings.gatewayports }}"; expected "no".
     success_msg: >-
       GatewayPorts={{ ssh_settings.gatewayports }}
+    quiet: true
 
 - name: Validate AllowTcpForwarding
   ansible.builtin.assert:
@@ -98,6 +106,7 @@
       expected "no".
     success_msg: >-
       AllowTcpForwarding={{ ssh_settings.allowtcpforwarding }}
+    quiet: true
 
 - name: Validate AllowAgentForwarding
   ansible.builtin.assert:
@@ -108,6 +117,7 @@
       expected "no".
     success_msg: >-
       AllowAgentForwarding={{ ssh_settings.allowagentforwarding }}
+    quiet: true
 
 - name: Validate SyslogFacility
   ansible.builtin.assert:
@@ -118,6 +128,7 @@
       "{{ ssh_syslog_facility }}".
     success_msg: >-
       SyslogFacility={{ ssh_settings.syslogfacility }}
+    quiet: true
 
 - name: Validate LogLevel
   ansible.builtin.assert:
@@ -128,6 +139,7 @@
       "{{ ssh_log_level }}".
     success_msg: >-
       LogLevel={{ ssh_settings.loglevel }}
+    quiet: true
 
 - name: Validate AuthorizedKeysCommand
   ansible.builtin.assert:
@@ -138,6 +150,7 @@
       expected "{{ ssh_authorized_keys_command }}".
     success_msg: >-
       AuthorizedKeysCommand={{ ssh_settings.authorizedkeyscommand }}
+    quiet: true
 
 - name: Validate AuthorizedKeysFile
   ansible.builtin.assert:
@@ -148,3 +161,4 @@
       expected "%h/.ssh/authorized_keys".
     success_msg: >-
       AuthorizedKeysFile={{ ssh_settings.authorizedkeysfile }}
+    quiet: true
