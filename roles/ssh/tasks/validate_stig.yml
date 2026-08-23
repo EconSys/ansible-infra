@@ -44,203 +44,203 @@
 
 - name: Parse SSH daemon scalar configuration
   ansible.builtin.set_fact:
-    ssh_settings: >-
+    ssh_runtime: >-
       {{ dict(ssh_current_config.stdout_lines | map('split', ' ', 1)) }}
 
 - name: Validate RHEL-09-255045 - PermitRootLogin
   ansible.builtin.assert:
     that:
-      - ssh_settings.permitrootlogin == "no"
+      - ssh_runtime.permitrootlogin == "no"
     fail_msg: >-
       RHEL-09-255045 failed: PermitRootLogin is
-      "{{ ssh_settings.permitrootlogin }}"; expected "no".
+      "{{ ssh_runtime.permitrootlogin }}"; expected "no".
     success_msg: >-
-      RHEL-09-255045: PermitRootLogin={{ ssh_settings.permitrootlogin }}
+      RHEL-09-255045: PermitRootLogin={{ ssh_runtime.permitrootlogin }}
     quiet: true
 
 - name: Validate RHEL-09-255050 - UsePAM
   ansible.builtin.assert:
     that:
-      - ssh_settings.usepam == "yes"
+      - ssh_runtime.usepam == "yes"
     fail_msg: >-
       RHEL-09-255050 failed: UsePAM is
-      "{{ ssh_settings.usepam }}"; expected "yes".
+      "{{ ssh_runtime.usepam }}"; expected "yes".
     success_msg: >-
-      RHEL-09-255050: UsePAM={{ ssh_settings.usepam }}
+      RHEL-09-255050: UsePAM={{ ssh_runtime.usepam }}
     quiet: true
 
 - name: Validate RHEL-09-255065 - Ciphers
   ansible.builtin.assert:
     that:
-      - ssh_settings.ciphers == (ssh_ciphers | join(','))
+      - ssh_runtime.ciphers == (ssh_ciphers | join(','))
     fail_msg: >-
       RHEL-09-255065 failed: Ciphers is
-      "{{ ssh_settings.ciphers }}"; expected "{{ ssh_ciphers | join(',') }}".
+      "{{ ssh_runtime.ciphers }}"; expected "{{ ssh_ciphers | join(',') }}".
     success_msg: >-
-      RHEL-09-255065: Ciphers={{ ssh_settings.ciphers }}
+      RHEL-09-255065: Ciphers={{ ssh_runtime.ciphers }}
     quiet: true
 
 - name: Validate RHEL-09-255075 - MACs
   ansible.builtin.assert:
     that:
-      - ssh_settings.macs == (ssh_macs | join(','))
+      - ssh_runtime.macs == (ssh_macs | join(','))
     fail_msg: >-
       RHEL-09-255075 failed: MACs is
-      "{{ ssh_settings.macs }}"; expected "{{ ssh_macs | join(',') }}".
+      "{{ ssh_runtime.macs }}"; expected "{{ ssh_macs | join(',') }}".
     success_msg: >-
-      RHEL-09-255075: MACs={{ ssh_settings.macs }}
+      RHEL-09-255075: MACs={{ ssh_runtime.macs }}
     quiet: true
 
 - name: Validate RHEL-09-255080 - HostbasedAuthentication
   ansible.builtin.assert:
     that:
-      - ssh_settings.hostbasedauthentication == "no"
+      - ssh_runtime.hostbasedauthentication == "no"
     fail_msg: >-
       RHEL-09-255080 failed: HostbasedAuthentication is
-      "{{ ssh_settings.hostbasedauthentication }}"; expected "no".
+      "{{ ssh_runtime.hostbasedauthentication }}"; expected "no".
     success_msg: >-
-      RHEL-09-255080: HostbasedAuthentication={{ ssh_settings.hostbasedauthentication }}
+      RHEL-09-255080: HostbasedAuthentication={{ ssh_runtime.hostbasedauthentication }}
     quiet: true
 
 - name: Validate RHEL-09-255085 - PermitUserEnvironment
   ansible.builtin.assert:
     that:
-      - ssh_settings.permituserenvironment == "no"
+      - ssh_runtime.permituserenvironment == "no"
     fail_msg: >-
       RHEL-09-255085 failed: PermitUserEnvironment is
-      "{{ ssh_settings.permituserenvironment }}"; expected "no".
+      "{{ ssh_runtime.permituserenvironment }}"; expected "no".
     success_msg: >-
-      RHEL-09-255085: PermitUserEnvironment={{ ssh_settings.permituserenvironment }}
+      RHEL-09-255085: PermitUserEnvironment={{ ssh_runtime.permituserenvironment }}
     quiet: true
 
 - name: Validate RHEL-09-255090 - RekeyLimit
   ansible.builtin.assert:
     that:
-      - ssh_settings.rekeylimit == (ssh_rekey_limit | join(' '))
+      - ssh_runtime.rekeylimit == (ssh_rekey_limit | join(' '))
     fail_msg: >-
       RHEL-09-255090 failed: RekeyLimit is
-      "{{ ssh_settings.rekeylimit }}"; expected "{{ ssh_rekey_limit | join(' ') }}".
+      "{{ ssh_runtime.rekeylimit }}"; expected "{{ ssh_rekey_limit | join(' ') }}".
     success_msg: >-
-      RHEL-09-255090: RekeyLimit={{ ssh_settings.rekeylimit }}
+      RHEL-09-255090: RekeyLimit={{ ssh_runtime.rekeylimit }}
     quiet: true
 
 - name: Validate RHEL-09-255095 - ClientAliveCountMax
   ansible.builtin.assert:
     that:
-      - ssh_settings.clientalivecountmax == (ssh_client_alive_count_max | string)
+      - ssh_runtime.clientalivecountmax == (ssh_client_alive_count_max | string)
     fail_msg: >-
       RHEL-09-255095 failed: ClientAliveCountMax is
-      "{{ ssh_settings.clientalivecountmax }}"; expected "{{ ssh_client_alive_count_max }}".
+      "{{ ssh_runtime.clientalivecountmax }}"; expected "{{ ssh_client_alive_count_max }}".
     success_msg: >-
-      RHEL-09-255095: ClientAliveCountMax={{ ssh_settings.clientalivecountmax }}
+      RHEL-09-255095: ClientAliveCountMax={{ ssh_runtime.clientalivecountmax }}
     quiet: true
 
 - name: Validate RHEL-09-255100 - ClientAliveInterval
   ansible.builtin.assert:
     that:
-      - (ssh_settings.clientaliveinterval | int) <= 600
+      - (ssh_runtime.clientaliveinterval | int) <= 600
     fail_msg: >-
       RHEL-09-255100 failed: ClientAliveInterval is
-      "{{ ssh_settings.clientaliveinterval }}"; expected 600 or less.
+      "{{ ssh_runtime.clientaliveinterval }}"; expected 600 or less.
     success_msg: >-
-      RHEL-09-255100: ClientAliveInterval={{ ssh_settings.clientaliveinterval }}
+      RHEL-09-255100: ClientAliveInterval={{ ssh_runtime.clientaliveinterval }}
     quiet: true
 
 - name: Validate RHEL-09-255130 - Compression
   ansible.builtin.assert:
     that:
-      - ssh_settings.compression == "no"
+      - ssh_runtime.compression == "no"
     fail_msg: >-
       RHEL-09-255130 failed: Compression is
-      "{{ ssh_settings.compression }}"; expected "no".
+      "{{ ssh_runtime.compression }}"; expected "no".
     success_msg: >-
-      RHEL-09-255130: Compression={{ ssh_settings.compression }}
+      RHEL-09-255130: Compression={{ ssh_runtime.compression }}
     quiet: true
 
 - name: Validate RHEL-09-255135 - GSSAPIAuthentication
   ansible.builtin.assert:
     that:
-      - ssh_settings.gssapiauthentication == "no"
+      - ssh_runtime.gssapiauthentication == "no"
     fail_msg: >-
       RHEL-09-255135 failed: GSSAPIAuthentication is
-      "{{ ssh_settings.gssapiauthentication }}"; expected "no".
+      "{{ ssh_runtime.gssapiauthentication }}"; expected "no".
     success_msg: >-
-      RHEL-09-255135: GSSAPIAuthentication={{ ssh_settings.gssapiauthentication }}
+      RHEL-09-255135: GSSAPIAuthentication={{ ssh_runtime.gssapiauthentication }}
     quiet: true
 
 - name: Validate RHEL-09-255140 - KerberosAuthentication
   ansible.builtin.assert:
     that:
-      - ssh_settings.kerberosauthentication == "no"
+      - ssh_runtime.kerberosauthentication == "no"
     fail_msg: >-
       RHEL-09-255140 failed: KerberosAuthentication is
-      "{{ ssh_settings.kerberosauthentication }}"; expected "no".
+      "{{ ssh_runtime.kerberosauthentication }}"; expected "no".
     success_msg: >-
-      RHEL-09-255140: KerberosAuthentication={{ ssh_settings.kerberosauthentication }}
+      RHEL-09-255140: KerberosAuthentication={{ ssh_runtime.kerberosauthentication }}
     quiet: true
 
 - name: Validate RHEL-09-255145 - IgnoreRhosts
   ansible.builtin.assert:
     that:
-      - ssh_settings.ignorerhosts == "yes"
+      - ssh_runtime.ignorerhosts == "yes"
     fail_msg: >-
       RHEL-09-255145 failed: IgnoreRhosts is
-      "{{ ssh_settings.ignorerhosts }}"; expected "yes".
+      "{{ ssh_runtime.ignorerhosts }}"; expected "yes".
     success_msg: >-
-      RHEL-09-255145: IgnoreRhosts={{ ssh_settings.ignorerhosts }}
+      RHEL-09-255145: IgnoreRhosts={{ ssh_runtime.ignorerhosts }}
     quiet: true
 
 - name: Validate RHEL-09-255150 - IgnoreUserKnownHosts
   ansible.builtin.assert:
     that:
-      - ssh_settings.ignoreuserknownhosts == "yes"
+      - ssh_runtime.ignoreuserknownhosts == "yes"
     fail_msg: >-
       RHEL-09-255150 failed: IgnoreUserKnownHosts is
-      "{{ ssh_settings.ignoreuserknownhosts }}"; expected "yes".
+      "{{ ssh_runtime.ignoreuserknownhosts }}"; expected "yes".
     success_msg: >-
-      RHEL-09-255150: IgnoreUserKnownHosts={{ ssh_settings.ignoreuserknownhosts }}
+      RHEL-09-255150: IgnoreUserKnownHosts={{ ssh_runtime.ignoreuserknownhosts }}
     quiet: true
 
 - name: Validate RHEL-09-255155 - X11Forwarding
   ansible.builtin.assert:
     that:
-      - ssh_settings.x11forwarding == "no"
+      - ssh_runtime.x11forwarding == "no"
     fail_msg: >-
       RHEL-09-255155 failed: X11Forwarding is
-      "{{ ssh_settings.x11forwarding }}"; expected "no".
+      "{{ ssh_runtime.x11forwarding }}"; expected "no".
     success_msg: >-
-      RHEL-09-255155: X11Forwarding={{ ssh_settings.x11forwarding }}
+      RHEL-09-255155: X11Forwarding={{ ssh_runtime.x11forwarding }}
     quiet: true
 
 - name: Validate RHEL-09-255160 - StrictModes
   ansible.builtin.assert:
     that:
-      - ssh_settings.strictmodes == "yes"
+      - ssh_runtime.strictmodes == "yes"
     fail_msg: >-
       RHEL-09-255160 failed: StrictModes is
-      "{{ ssh_settings.strictmodes }}"; expected "yes".
+      "{{ ssh_runtime.strictmodes }}"; expected "yes".
     success_msg: >-
-      RHEL-09-255160: StrictModes={{ ssh_settings.strictmodes }}
+      RHEL-09-255160: StrictModes={{ ssh_runtime.strictmodes }}
     quiet: true
 
 - name: Validate RHEL-09-255165 - PrintLastLog
   ansible.builtin.assert:
     that:
-      - ssh_settings.printlastlog == "yes"
+      - ssh_runtime.printlastlog == "yes"
     fail_msg: >-
       RHEL-09-255165 failed: PrintLastLog is
-      "{{ ssh_settings.printlastlog }}"; expected "yes".
+      "{{ ssh_runtime.printlastlog }}"; expected "yes".
     success_msg: >-
-      RHEL-09-255165: PrintLastLog={{ ssh_settings.printlastlog }}
+      RHEL-09-255165: PrintLastLog={{ ssh_runtime.printlastlog }}
     quiet: true
 
 - name: Validate RHEL-09-255175 - X11UseLocalhost
   ansible.builtin.assert:
     that:
-      - ssh_settings.x11uselocalhost == "yes"
+      - ssh_runtime.x11uselocalhost == "yes"
     fail_msg: >-
       RHEL-09-255175 failed: X11UseLocalhost is
-      "{{ ssh_settings.x11uselocalhost }}"; expected "yes".
+      "{{ ssh_runtime.x11uselocalhost }}"; expected "yes".
     success_msg: >-
-      RHEL-09-255175: X11UseLocalhost={{ ssh_settings.x11uselocalhost }}
+      RHEL-09-255175: X11UseLocalhost={{ ssh_runtime.x11uselocalhost }}
     quiet: true
