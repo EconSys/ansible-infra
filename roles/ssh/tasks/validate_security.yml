@@ -6,10 +6,30 @@
   register: ssh_current_config
   changed_when: false
 
-- name: Parse SSH daemon configuration
+- name: Parse SSH daemon scalar configuration
   ansible.builtin.set_fact:
     ssh_settings: >-
       {{ dict(ssh_current_config.stdout_lines | map('split', ' ', 1)) }}
+
+- name: Parse SSH AllowGroups
+  ansible.builtin.set_fact:
+    ssh_allow_groups_settings: >-
+      {{
+        ssh_current_config.stdout_lines
+        | select('match', '^allowgroups ')
+        | map('regex_replace', '^allowgroups ', '')
+        | list
+      }}
+
+- name: Parse SSH HostKey
+  ansible.builtin.set_fact:
+    ssh_host_keys_settings: >-
+      {{
+        ssh_current_config.stdout_lines
+        | select('match', '^hostkey ')
+        | map('regex_replace', '^hostkey ', '')
+        | list
+      }}
 
 - name: Validate PasswordAuthentication
   ansible.builtin.assert:
@@ -69,12 +89,12 @@
 - name: Validate AllowGroups
   ansible.builtin.assert:
     that:
-      - ssh_settings.allowgroups == (ssh_allow_groups | join(' '))
+      - ssh_allow_groups_settings == ssh_allow_groups
     fail_msg: >-
-      AllowGroups is "{{ ssh_settings.allowgroups }}"; expected
-      "{{ ssh_allow_groups | join(' ') }}".
+      AllowGroups is "{{ ssh_allow_groups_settings }}"; expected
+      "{{ ssh_allow_groups }}".
     success_msg: >-
-      AllowGroups={{ ssh_settings.allowgroups }}
+      AllowGroups={{ ssh_allow_groups_settings }}
     quiet: true
 
 - name: Validate PermitTunnel
@@ -161,4 +181,15 @@
       expected "%h/.ssh/authorized_keys".
     success_msg: >-
       AuthorizedKeysFile={{ ssh_settings.authorizedkeysfile }}
+    quiet: true
+
+- name: Validate HostKey
+  ansible.builtin.assert:
+    that:
+      - ssh_host_keys_settings.hostkey == ssh_host_keys
+    fail_msg: >-
+      HostKey is "{{ ssh_host_keys_settings.hostkey }}";
+      expected ssh_host_keys.
+    success_msg: >-
+      HostKey={{ ssh_host_keys_settings.hostkey }}
     quiet: true

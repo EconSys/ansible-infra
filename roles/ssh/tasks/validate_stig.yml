@@ -42,7 +42,7 @@
   register: ssh_current_config
   changed_when: false
 
-- name: Parse SSH daemon configuration
+- name: Parse SSH daemon scalar configuration
   ansible.builtin.set_fact:
     ssh_settings: >-
       {{ dict(ssh_current_config.stdout_lines | map('split', ' ', 1)) }}
