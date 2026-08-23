@@ -69,28 +69,6 @@
       RHEL-09-255050: UsePAM={{ ssh_runtime.usepam }}
     quiet: true
 
-- name: Validate RHEL-09-255065 - Ciphers
-  ansible.builtin.assert:
-    that:
-      - ssh_runtime.ciphers == (ssh_ciphers | join(','))
-    fail_msg: >-
-      RHEL-09-255065 failed: Ciphers is
-      "{{ ssh_runtime.ciphers }}"; expected "{{ ssh_ciphers | join(',') }}".
-    success_msg: >-
-      RHEL-09-255065: Ciphers={{ ssh_runtime.ciphers }}
-    quiet: true
-
-- name: Validate RHEL-09-255075 - MACs
-  ansible.builtin.assert:
-    that:
-      - ssh_runtime.macs == (ssh_macs | join(','))
-    fail_msg: >-
-      RHEL-09-255075 failed: MACs is
-      "{{ ssh_runtime.macs }}"; expected "{{ ssh_macs | join(',') }}".
-    success_msg: >-
-      RHEL-09-255075: MACs={{ ssh_runtime.macs }}
-    quiet: true
-
 - name: Validate RHEL-09-255080 - HostbasedAuthentication
   ansible.builtin.assert:
     that:

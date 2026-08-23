@@ -120,19 +120,6 @@ AuthorizedKeysCommandUser {{ ssh_authorized_keys_command_user }}
 # but this is overridden so installations will only check .ssh/authorized_keys
 AuthorizedKeysFile %h/.ssh/authorized_keys
 
-# Cryptography
-# ============
-
-# Ciphers
-Ciphers {{ ssh_ciphers | join(',') }}
-# MAC (Message Authentication Code) algorithms
-MACs {{ ssh_macs | join(',') }}
-# KEX (Key Exchange) algorithms
-KexAlgorithms {{ ssh_kex_algorithms | join(',') }}
-
-# SSH Host key algorithms
-HostKeyAlgorithms {{ ssh_host_key_algorithms | join(',') }}
-
 # Environment
 # ===========
 
