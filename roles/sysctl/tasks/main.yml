@@ -4,5 +4,5 @@
 - name: Apply complete sysctl policy before AMI finalization
   ansible.builtin.meta: flush_handlers
 
-- name: Validate sysctl configurations
-  ansible.builtin.import_tasks: validate.yml
+- name: Validate sysctl STIG hardening configurations
+  ansible.builtin.import_tasks: validate_stig.yml

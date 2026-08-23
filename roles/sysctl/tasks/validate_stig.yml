@@ -19,15 +19,17 @@
       - sysctl_runtime_value.rc == 0
       - (sysctl_runtime_value.stdout | trim) == sysctl_runtime_value.sysctl_param.value
     fail_msg: >-
-      Sysctl validation failed for {{ sysctl_runtime_value.sysctl_param.name }}.
+      {{ sysctl_runtime_value.sysctl_param.stig }} failed for
+      {{ sysctl_runtime_value.sysctl_param.name }}.
 
       Expected: {{ sysctl_runtime_value.sysctl_param.value }}
       Actual: {{ sysctl_runtime_value.stdout | default('<unavailable>', true) | trim }}
 
       Return code: {{ sysctl_runtime_value.rc }}
-
-      stderr:
-      {{ sysctl_runtime_value.stderr | default('') | trim }}
+      stderr: {{ sysctl_runtime_value.stderr | default('') | trim }}
+    success_msg: >-
+      {{ sysctl_runtime_value.sysctl_param.stig }}:
+      {{ sysctl_runtime_value.sysctl_param.name }}={{ sysctl_runtime_value.stdout | trim }}
     quiet: true
   loop: "{{ sysctl_runtime_values.results }}"
   loop_control:

@@ -14,5 +14,3 @@
       {{ sysctl_param.name }}={{ sysctl_param.value }}
       {{ '[%s]' | format(sysctl_param.stig) if sysctl_param.stig | default('', true) else '' }}
   notify: Reload sysctl
-  tags:
-    - DISA-STIG
