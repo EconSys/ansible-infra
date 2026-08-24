@@ -25,6 +25,11 @@ ssh_rekey_limit:
 ssh_client_alive_interval: 300
 ssh_client_alive_count_max: 2
 
+# RekeyLimit data is normalized at runtime
+ssh_rekey_limit_normalized:
+  - 1073741824
+  - 3600
+
 ssh_client_alive_count_max_packer: 0
 
 ssh_login_grace_time: 60

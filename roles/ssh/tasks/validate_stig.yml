@@ -94,10 +94,10 @@
 - name: Validate RHEL-09-255090 - RekeyLimit
   ansible.builtin.assert:
     that:
-      - ssh_runtime.rekeylimit == (ssh_rekey_limit | join(' '))
+      - ssh_runtime.rekeylimit == (ssh_rekey_limit_normalized | join(' '))
     fail_msg: >-
       RHEL-09-255090 failed: RekeyLimit is
-      "{{ ssh_runtime.rekeylimit }}"; expected "{{ ssh_rekey_limit | join(' ') }}".
+      "{{ ssh_runtime.rekeylimit }}"; expected "{{ ssh_rekey_limit_normalized | join(' ') }}".
     success_msg: >-
       RHEL-09-255090: RekeyLimit={{ ssh_runtime.rekeylimit }}
     quiet: true
