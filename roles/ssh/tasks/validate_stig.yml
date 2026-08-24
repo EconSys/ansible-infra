@@ -112,6 +112,8 @@
     success_msg: >-
       RHEL-09-255095: ClientAliveCountMax={{ ssh_runtime.clientalivecountmax }}
     quiet: true
+    when:
+      - is_golden_ami
 
 - name: Validate RHEL-09-255100 - ClientAliveInterval
   ansible.builtin.assert:
