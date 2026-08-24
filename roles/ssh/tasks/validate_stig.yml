@@ -2,7 +2,7 @@
 ## SSH daemon hardening config file ownership and permissions per STIG
 - name: Validate SSH hardening configuration ownership and permissions
   ansible.builtin.stat:
-    path: /etc/ssh/sshd_config.d/60-hardening.conf
+    path: /etc/ssh/sshd_config.d/41-hardening.conf
   register: ssh_hardening_config
 
 - name: Validate RHEL-09-255105 - SSH configuration group ownership
