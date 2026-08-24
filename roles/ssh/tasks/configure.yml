@@ -13,7 +13,7 @@
 - name: Install sshd hardening policy
   ansible.builtin.template:
     src: hardening.conf.j2
-    dest: /etc/ssh/sshd_config.d/60-hardening.conf
+    dest: /etc/ssh/sshd_config.d/41-hardening.conf
     owner: root
     group: root
     mode: "0600"
