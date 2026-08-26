@@ -30,7 +30,7 @@
     that:
       - openscap_datastream_search.matched == 1
     fail_msg: >-
-      Expected exactly one OpenSCAP datastream for RHEL {{ rhel_version }},
+      Expected exactly one OpenSCAP datastream for RHEL {{ ansible_facts['distribution_major_version'] }},
       but found {{ openscap_datastream_search.matched }}.
 
 - name: Set OpenSCAP datastream path
