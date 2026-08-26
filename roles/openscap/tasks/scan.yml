@@ -1,3 +1,8 @@
+- name: Gather Ansible OS distribution major version
+  ansible.builtin.setup:
+    filter:
+      - distribution_major_version
+
 - name: Create openscap directory
   ansible.builtin.file:
     path: "{{ openscap_directory }}"
@@ -15,7 +20,7 @@
     paths:
       - /usr/share/xml/scap/ssg/content
     patterns:
-      - "ssg-rhel{{ rhel_version }}-ds.xml"
+      - "ssg-rhel{{ ansible_facts['distribution_major_version'] }}-ds.xml"
     file_type: file
     recurse: false
   register: openscap_datastream_search
