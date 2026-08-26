@@ -1,0 +1,85 @@
+- name: Gather firewalld configuration
+  ansible.posix.firewalld_info:
+    zones:
+      - "{{ firewall_default_zone }}"
+  register: firewall_info
+
+# Zone and interface validation
+- name: Get current default firewalld zone
+  ansible.builtin.command:
+    argv:
+      - firewall-cmd
+      - --get-default-zone
+  register: firewall_current_default_zone
+  changed_when: false
+
+- name: Assert default firewalld zone is required firewalld zone
+  ansible.builtin.assert:
+    that:
+      - firewall_current_default_zone.stdout | trim == firewall_default_zone
+    fail_msg: >-
+      firewalld default zone is
+      '{{ firewall_current_default_zone.stdout | trim }}',
+      but the required default zone is '{{ firewall_default_zone }}'.
+
+- name: Get firewalld zone of default-route interface
+  ansible.builtin.command:
+    argv:
+      - firewall-cmd
+      - "--get-zone-of-interface={{ ansible_facts.default_ipv4.interface }}"
+  register: firewall_interface_zone
+  changed_when: false
+
+- name: Assert default-route interface is bound to the required firewalld zone
+  ansible.builtin.assert:
+    that:
+      - firewall_interface_zone.stdout | trim == firewall_default_zone
+    fail_msg: >-
+      Default-route interface '{{ ansible_facts.default_ipv4.interface }}' is
+      bound to '{{ firewall_interface_zone.stdout | trim }}', but it must be
+      bound to '{{ firewall_default_zone }}'.
+
+- name: Get firewalld zone of loopback interface
+  ansible.builtin.command:
+    argv:
+      - firewall-cmd
+      - --get-zone-of-interface=lo
+  register: firewall_loopback_interface_zone
+  changed_when: false
+
+- name: Assert loopback interface is bound to the required loopback zone
+  ansible.builtin.assert:
+    that:
+      - firewall_loopback_interface_zone.stdout | trim == firewall_loopback_zone
+    fail_msg: >-
+      Loopback interface 'lo' is bound to
+      '{{ firewall_loopback_interface_zone.stdout | trim }}',
+      but it must be bound to '{{ firewall_loopback_zone }}'.
+
+# Baseline firewall Rules validation
+- name: Assert SSH service is enabled in required firewalld zone
+  ansible.builtin.assert:
+    that:
+      - "'ssh' in firewall_info.firewalld_info.zones[firewall_default_zone].services"
+    fail_msg: >-
+      firewalld zone '{{ firewall_default_zone }}' does not allow the
+      'ssh' service, so TCP/22 is not permitted by this zone policy.
+
+- name: Assert ICMP block inversion is enabled
+  ansible.builtin.assert:
+    that:
+      - firewall_info.firewalld_info.zones[firewall_default_zone].icmp_block_inversion
+    fail_msg: >-
+      ICMP block inversion is not enabled in firewalld zone
+      '{{ firewall_default_zone }}'.
+
+- name: Assert required ICMP control messages are allowed
+  ansible.builtin.assert:
+    that:
+      - item in firewall_info.firewalld_info.zones[firewall_default_zone].icmp_blocks
+    fail_msg: >-
+      ICMP control message '{{ item }}' is not allowed in firewalld zone
+      '{{ firewall_default_zone }}'.
+  loop: "{{ firewall_default_zone_icmp_allowed_types }}"
+  loop_control:
+    label: "{{ item }}"

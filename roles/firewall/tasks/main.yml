@@ -1,0 +1,8 @@
+- name: Install firewalld
+  ansible.builtin.meta: install.yml
+
+- name: Configure firewalld
+  ansible.builtin.import_tasks: configure.yml
+
+- name: Validate firewalld configurations
+  ansible.builtin.import_tasks: validate.yml

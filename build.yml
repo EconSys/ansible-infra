@@ -14,6 +14,9 @@
 - name: Configure ssh
   ansible.builtin.import_playbook: playbooks/configure_ssh.yml
 
+- name: Configure firewalld
+  ansible.builtin.import_playbook: playbooks/configure_firewall.yml
+
 - name: Configure sysctl hardening
   ansible.builtin.import_playbook: playbooks/configure_sysctl.yml
 

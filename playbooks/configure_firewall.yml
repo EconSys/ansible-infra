@@ -1,0 +1,7 @@
+---
+- name: Configure firewalld
+  hosts: local_host
+  become: true
+
+  roles:
+    - role: firewall

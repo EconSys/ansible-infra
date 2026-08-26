@@ -1,0 +1,67 @@
+# Zone and interface configuration
+- name: Gather network facts
+  ansible.builtin.setup:
+    gather_subset:
+      - network
+
+- name: Set default firewalld zone
+  ansible.builtin.command:
+    argv:
+      - firewall-cmd
+      - "--set-default-zone={{ firewall_default_zone }}"
+  changed_when: false
+
+- name: Bind loopback interface to the loopback zone
+  ansible.posix.firewalld:
+    zone: "{{ firewall_loopback_zone }}"
+    interface: lo
+    state: enabled
+    immediate: true
+    permanent: true
+
+- name: Assert a default IPv4 route interface was discovered
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.default_ipv4 is defined
+      - ansible_facts.default_ipv4.interface is defined
+      - ansible_facts.default_ipv4.interface | length > 0
+    fail_msg: >-
+      No default IPv4 route interface was discovered. Cannot explicitly bind
+      an interface to firewalld zone '{{ firewall_default_zone }}'.
+
+- name: Bind default-route interface to the required zone
+  ansible.posix.firewalld:
+    zone: "{{ firewall_default_zone }}"
+    interface: "{{ ansible_facts.default_ipv4.interface }}"
+    state: enabled
+    immediate: true
+    permanent: true
+
+# Baseline firewall Rules
+
+- name: Enable ICMP block inversion
+  ansible.posix.firewalld:
+    zone: "{{ firewall_default_zone }}"
+    state: enabled
+    immediate: true
+    permanent: true
+    icmp_block_inversion: true
+
+- name: Allow required ICMP control messages
+  ansible.posix.firewalld:
+    zone: "{{ firewall_default_zone }}"
+    state: enabled
+    immediate: true
+    permanent: true
+    icmp_block: "{{ item }}"
+  loop: "{{ firewall_default_zone_icmp_allowed_types }}"
+  loop_control:
+    label: "{{ item }}"
+
+- name: Allow SSH
+  ansible.posix.firewalld:
+    zone: "{{ firewall_default_zone }}"
+    service: ssh
+    immediate: true
+    permanent: true
+    state: enabled
