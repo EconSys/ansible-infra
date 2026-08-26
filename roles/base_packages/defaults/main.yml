@@ -17,9 +17,8 @@ base_packages_baseos_repo: "rhel-{{ rhel_version }}-baseos-rhui-rpms"
 base_packages_build_tools:
   - git
   - make
-  - tar
+  - tree
   - wget
-  - zip
 
 base_packages_system:
   - bind-utils
@@ -35,11 +34,9 @@ base_packages_system:
   - policycoreutils-devel
   - postfix
   - rpcbind
-  - tree
   - setools-console
 
 base_packages_networking:
-  - firewalld
   - net-tools
   - NetworkManager-cloud-setup
   - openssl-libs
