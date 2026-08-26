@@ -16,9 +16,3 @@
 
 - name: Configure firewalld
   ansible.builtin.import_playbook: playbooks/configure_firewall.yml
-
-- name: Configure sysctl hardening
-  ansible.builtin.import_playbook: playbooks/configure_sysctl.yml
-
-- name: Cleanup
-  ansible.builtin.import_playbook: playbooks/cleanup.yml

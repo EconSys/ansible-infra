@@ -1,0 +1,8 @@
+- name: Configure sysctl hardening
+  ansible.builtin.import_playbook: playbooks/configure_sysctl.yml
+
+- name: Configure OpenSCAP
+  ansible.builtin.import_playbook: playbooks/configure_openscap.yml
+
+- name: Cleanup
+  ansible.builtin.import_playbook: playbooks/cleanup.yml
