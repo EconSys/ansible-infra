@@ -1,0 +1,8 @@
+- name: Install necessary packages
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - openscap-scanner
+    - openscap-utils
+    - scap-security-guide

@@ -1,0 +1,5 @@
+- name: Install openscap packages
+  ansible.builtin.import_tasks: install.yml
+
+- name: Run openscap
+  ansible.builtin.import_tasks: scan.yml

@@ -1,0 +1,92 @@
+- name: Create openscap directory
+  ansible.builtin.file:
+    path: "{{ openscap_directory }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
+
+- name: Find OpenSCAP datastream
+  ansible.builtin.find:
+    paths:
+      - /usr/share/xml/scap/ssg/content
+    patterns:
+      - "ssg-rhel{{ rhel_version }}-ds.xml"
+    file_type: file
+    recurse: false
+  register: openscap_datastream_search
+
+- name: Verify that exactly one datastream was found
+  ansible.builtin.assert:
+    that:
+      - openscap_datastream_search.matched == 1
+    fail_msg: >-
+      Expected exactly one OpenSCAP datastream for RHEL {{ rhel_version }},
+      but found {{ openscap_datastream_search.matched }}.
+
+- name: Set OpenSCAP datastream path
+  ansible.builtin.set_fact:
+    openscap_datastream: "{{ openscap_datastream_search.files[0].path }}"
+
+- name: Run OpenSCAP evaluation
+  ansible.builtin.command:
+    argv:
+      - oscap
+      - xccdf
+      - eval
+      - --fetch-remote-resources
+      - --profile
+      - "{{ openscap_profile }}"
+      - --results-arf
+      - "{{ openscap_arf_file }}"
+      - "{{ openscap_datastream }}"
+  register: openscap_scan
+  changed_when: false
+  failed_when: openscap_scan.rc not in [0, 2]
+
+- name: Generate OpenSCAP HTML report
+  ansible.builtin.shell:
+    cmd: >
+      oscap xccdf generate report
+      {{ openscap_arf_file | quote }}
+      > {{ openscap_report_file | quote }}
+  register: openscap_report
+  changed_when: true
+
+- name: Parse XML and generate tab-delimited OpenSCAP file
+  ansible.builtin.shell:
+    cmd: |
+      python3 - "{{ openscap_arf_file }}" "{{ openscap_tab_delimited_file }}" <<'PY'
+      import sys
+      import xml.etree.ElementTree as ET
+
+      arf_file = sys.argv[1]
+      output_file = sys.argv[2]
+
+      def local_name(tag):
+          return tag.rsplit("}", 1)[-1]
+
+      def child_text(element, name):
+          for child in element:
+              if local_name(child.tag) == name:
+                  return "".join(child.itertext()).strip()
+          return ""
+
+      root = ET.parse(arf_file).getroot()
+
+      with open(output_file, "w", encoding="utf-8") as output:
+          for element in root.iter():
+              if local_name(element.tag) != "rule-result":
+                  continue
+
+              rule_id = child_text(element, "idref")
+              title = child_text(element, "title")
+              result = child_text(element, "result")
+
+              output.write(f"{rule_id}\t{title}\t{result}\n")
+      PY
+  changed_when: true

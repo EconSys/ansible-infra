@@ -1,7 +1,7 @@
 - name: Configure sysctl hardening
   ansible.builtin.import_playbook: playbooks/configure_sysctl.yml
 
-- name: Configure OpenSCAP
+- name: Configure OpenSCAP (Security Content Automation Protocol)
   ansible.builtin.import_playbook: playbooks/configure_openscap.yml
 
 - name: Cleanup
