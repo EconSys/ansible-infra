@@ -1,0 +1,7 @@
+- name: Cleanup OpenSCAP scan files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ openscap_arf_xml }}"
+    - "{{ openscap_report_html }}"

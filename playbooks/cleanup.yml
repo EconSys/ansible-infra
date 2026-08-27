@@ -13,3 +13,8 @@
       ansible.builtin.import_role:
         name: logs
         tasks_from: cleanup
+
+    - name: Cleanup OpenSCAP scan files
+      ansible.builtin.import_role:
+        name: openscap
+        tasks_from: cleanup
