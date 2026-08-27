@@ -75,23 +75,39 @@
       def local_name(tag):
           return tag.rsplit("}", 1)[-1]
 
-      def child_text(element, name):
+      def direct_child_text(element, child_name):
           for child in element:
-              if local_name(child.tag) == name:
+              if local_name(child.tag) == child_name:
                   return "".join(child.itertext()).strip()
           return ""
 
       root = ET.parse(arf_file).getroot()
 
+      # Build a lookup of XCCDF rule ID -> rule title.
+      rule_titles = {}
+
+      for element in root.iter():
+          if local_name(element.tag) == "Rule":
+              rule_id = element.attrib.get("id")
+              title = direct_child_text(element, "title")
+
+              if rule_id:
+                  rule_titles[rule_id] = title
+
       with open(output_file, "w", encoding="utf-8") as output:
+          output.write("idref\ttitle\tresult\n")
+
           for element in root.iter():
               if local_name(element.tag) != "rule-result":
                   continue
 
-              rule_id = child_text(element, "idref")
-              title = child_text(element, "title")
-              result = child_text(element, "result")
+              # In XCCDF, idref is normally an attribute.
+              rule_id = element.attrib.get("idref", "")
+              result = direct_child_text(element, "result")
+              title = rule_titles.get(rule_id, "")
 
-              output.write(f"{rule_id}\t{title}\t{result}\n")
+              output.write(
+                  f"{rule_id}\t{title}\t{result}\n"
+              )
       PY
   changed_when: true
