@@ -1,6 +1,7 @@
-- name: Install necessary packages
+- name: Install OpenSCAP tools
   ansible.builtin.dnf:
     name: "{{ item }}"
+    disable_gpg_check: false
     state: present
   loop:
     - openscap-scanner

@@ -5,3 +5,12 @@
   loop:
     - "{{ openscap_arf_xml }}"
     - "{{ openscap_report_html }}"
+
+- name: Remove OpenSCAP tools
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - openscap-scanner
+    - openscap-utils
+    - scap-security-guide
