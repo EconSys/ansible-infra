@@ -193,3 +193,14 @@
     success_msg: >-
       HostKey={{ ssh_host_keys_runtime }}
     quiet: true
+
+- name: Validate SSH warning banner
+  ansible.builtin.assert:
+    that:
+      - ssh_runtime.banner == "/etc/issue.net"
+    fail_msg: >-
+      Banner is "{{ ssh_runtime.banner }}";
+      expected "/etc/issue.net".
+    success_msg: >-
+      Banner={{ ssh_runtime.banner }}
+    quiet: true
