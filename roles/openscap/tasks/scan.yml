@@ -47,7 +47,7 @@
       - --profile
       - "{{ openscap_profile }}"
       - --results-arf
-      - "{{ openscap_arf_file }}"
+      - "{{ openscap_arf_xml }}"
       - "{{ openscap_datastream }}"
   register: openscap_scan
   changed_when: false
@@ -57,7 +57,7 @@
   ansible.builtin.shell:
     cmd: >
       oscap xccdf generate report
-      {{ openscap_arf_file | quote }}
+      {{ openscap_arf_xml | quote }}
       > {{ openscap_report_file | quote }}
   register: openscap_report
   changed_when: true
@@ -65,7 +65,7 @@
 - name: Parse XML and generate tab-delimited OpenSCAP file
   ansible.builtin.shell:
     cmd: |
-      python3 - "{{ openscap_arf_file }}" "{{ openscap_tab_delimited_file }}" <<'PY'
+      python3 - "{{ openscap_report_html }}" "{{ openscap_results_tsv }}" <<'PY'
       import sys
       import xml.etree.ElementTree as ET
 
