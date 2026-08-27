@@ -8,15 +8,22 @@
 # it loads after these files and overrides duplicate sysctl assignments.
 
 # baseline hardening
-sysctl_conf_fs: /etc/sysctl.d/60-fs-hardening.conf
-sysctl_conf_kernel: /etc/sysctl.d/61-kernel-hardening.conf
-sysctl_conf_network: /etc/sysctl.d/62-network-hardening.conf
-sysctl_conf_user: /etc/sysctl.d/63-user-hardening.conf
+sysctl_conf_crypto: /etc/sysctl.d/60-crypto.conf
+sysctl_conf_fs: /etc/sysctl.d/61-fs-hardening.conf
+sysctl_conf_kernel: /etc/sysctl.d/62-kernel-hardening.conf
+sysctl_conf_network: /etc/sysctl.d/63-network-hardening.conf
+sysctl_conf_user: /etc/sysctl.d/64-user-hardening.conf
 
 # Use 70+ for custom overrides of baseline hardening
 sysctl_conf_ip_forwarding: /etc/sysctl.d/70-ip-forwarding.conf
 
 sysctl_params:
+  # RHEL 9 must enable FIPS mode
+  - name: crypto.fips_enabled
+    value: "1"
+    file: "{{ sysctl_conf_crypto }}"
+    stig: "RHEL-09-671010"
+
   # RHEL 9 must enable kernel parameters to enforce discretionary access
   # control on hardlinks. This prevents users from creating hard links to
   # files they do not own.
