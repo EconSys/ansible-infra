@@ -1,6 +1,7 @@
 - name: Gather Ansible OS distribution major version
   ansible.builtin.setup:
     filter:
+      - distribution
       - distribution_major_version
 
 - name: Create openscap directory
@@ -15,12 +16,12 @@
     setype: _default
     selevel: _default
 
-- name: Find OpenSCAP datastream
+- name: Find OpenSCAP RHEL datastream
   ansible.builtin.find:
     paths:
       - /usr/share/xml/scap/ssg/content
     patterns:
-      - "ssg-rhel{{ ansible_facts['distribution_major_version'] }}-ds.xml"
+      - "{{ openscap_base_rule_set_rhel }}"
     file_type: file
     recurse: false
   register: openscap_datastream_search
@@ -30,14 +31,14 @@
     that:
       - openscap_datastream_search.matched == 1
     fail_msg: >-
-      Expected exactly one OpenSCAP datastream for RHEL {{ ansible_facts['distribution_major_version'] }},
+      Expected exactly one OpenSCAP datastream for {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_major_version'] }},
       but found {{ openscap_datastream_search.matched }}.
 
 - name: Set OpenSCAP datastream path
   ansible.builtin.set_fact:
     openscap_datastream: "{{ openscap_datastream_search.files[0].path }}"
 
-- name: Run OpenSCAP evaluation
+- name: Run OpenSCAP STIG evaluation
   ansible.builtin.command:
     argv:
       - oscap
@@ -45,7 +46,7 @@
       - eval
       - --fetch-remote-resources
       - --profile
-      - "{{ openscap_profile }}"
+      - "{{ openscap_profile_stig }}"
       - --results-arf
       - "{{ openscap_arf_xml }}"
       - "{{ openscap_datastream }}"

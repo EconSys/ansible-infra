@@ -1,4 +1,6 @@
-openscap_profile: xccdf_org.ssgproject.content_profile_stig
+openscap_profile_stig: xccdf_org.ssgproject.content_profile_stig
+openscap_base_rule_set_id_rhel: "scap_org.open-scap_cref_ssg-rhel{{ ansible_distribution_major_version }}-xccdf.xml"
+openscap_base_rule_set_rhel: "ssg-rhel{{ ansible_distribution_major_version }}-ds.xml"
 
 openscap_directory: /tmp/openscap
 openscap_arf_xml: "{{ openscap_directory }}/arf.xml"
