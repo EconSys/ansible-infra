@@ -16,8 +16,8 @@ ssh_authorized_keys_command: "/usr/bin/timeout 5s /usr/local/bin/ssh-keyldap %u 
 ssh_authorized_keys_command_user: nobody
 
 ssh_syslog_facility: AUTHPRIV
-# QUIET, FATAL, ERROR, INFO, VERBOSE, DEBUG, DEBUG1, DEBUG2,DEBUG3
-ssh_log_level: INFO
+# CCE-86923-0 Set SSH Daemon LogLevel to VERBOSE
+ssh_log_level: VERBOSE
 
 ssh_rekey_limit:
   - 1G
