@@ -9,11 +9,22 @@
     validate_certs: true
     disable_gpg_check: false
 
-- name: Install LDAP Python library
+- name: Install python-ldap development packages
   ansible.builtin.dnf:
     name:
-      - python3-ldap
+      - gcc
+      -  "python{{ ansible_facts['python'].version.major }}.{{ ansible_facts['python'].version.minor }}-devel"
+      - openldap-devel
     state: present
+
+- name: Install python-ldap
+  ansible.builtin.command:
+    argv:
+      - "{{ ansible_facts['python'].executable }}"
+      - -m
+      - pip
+      - install
+      - python-ldap
 
 - name: Verify python-ldap is available to Ansible Python
   ansible.builtin.command:
