@@ -6,26 +6,15 @@
 #   - onelevel - avoids recursively searching configuration subtrees
 #   - subordinate - requires the LDAPv3 subordinate feature extension
 
-- name: Query the OpenLDAP configuration context from the root DSE
-  community.general.ldap_search:
-    server_uri: ldapi:///
-    sasl_class: external
-    dn: ""
-    scope: base
-    attrs:
-      - configContext
-  register: ldap_config_context
+- name: Query OpenLDAP configuration context from the root DSE
+  ansible.builtin.command:
+    cmd: ldapsearch -Q -Y EXTERNAL -H ldapi:/// -LLL -s base -b "" configContext
+  register: ldap_config_context_raw
   changed_when: false
-  debugger: on_failed
 
-- name: Debug OpenLDAP configuration context result
-  ansible.builtin.debug:
-    var: ldap_config_context
-
-- name: Set OpenLDAP configuration context DN
+- name: Set configuration context DN
   ansible.builtin.set_fact:
-    ldap_config_context_dn: "{{ ldap_config_context.results[0].configContext[0] }}"
-  changed_when: false
+    ldap_config_context_dn: "{{ ldap_config_context_raw.stdout_lines | select('match', '^configContext:') | first | regex_replace('^configContext:\\s*', '') }}"
 
 - name: Configure Global and Data configuration context
   community.general.ldap_attrs:
@@ -39,32 +28,18 @@
       olcPasswordCryptSaltFormat: "{{ ldap_olc.password_crypt_salt_format }}"
     state: exact
 
-- name: Find OpenLDAP database configuration DN
-  community.general.ldap_search:
-    server_uri: ldapi:///
-    sasl_class: external
-    dn: "{{ ldap_config_context_dn }}"
-    scope: onelevel
-    filter: "(olcSuffix=*)"
-    attrs:
-      - dn
-  register: ldap_database_dn
+- name: Query OpenLDAP database configuration
+  ansible.builtin.command:
+    cmd: >-
+      ldapsearch -Q -Y EXTERNAL -H ldapi:/// -LLL
+      -b "{{ ldap_config_context_dn }}" -s one
+      "(olcSuffix=*)" dn
+  register: ldap_database_dn_raw
   changed_when: false
-  debugger: on_failed
 
-- name: Debug OpenLDAP database configuration DN
-  ansible.builtin.debug:
-    var: ldap_database_dn
-
-- name: Assert that OpenLDAP database DN was detected
-  ansible.builtin.assert:
-    that:
-      - ldap_database_dn.results | length > 0
-    fail_msg: >-
-      Failed to detect an OpenLDAP database DN with an olcSuffix under
-      {{ ldap_config_context_dn }}.
-    success_msg: >-
-      OpenLDAP DB DN: {{ ldap_database_dn.results[0].dn }}
+- name: Set OpenLDAP database configuration DN
+  ansible.builtin.set_fact:
+    ldap_db_dn: "{{ ldap_database_dn_raw.stdout_lines | select('match', '^dn:') | first | regex_replace('^dn:\\s*', '') }}"
 
 - name: Set OpenLDAP database configuration DN
   ansible.builtin.set_fact:
@@ -99,40 +74,18 @@
     ordered: true
     state: exact
 
-- name: Find OpenLDAP frontend database configuration DN
-  community.general.ldap_search:
-    server_uri: ldapi:///
-    sasl_class: external
-    dn: "{{ ldap_config_context_dn }}"
-    scope: onelevel
-    filter: "(&(objectClass=olcFrontendConfig)(olcDatabase=frontend))"
-    attrs:
-      - olcDatabase
-      - olcPasswordHash
-  register: ldap_frontend_database
+- name: Query OpenLDAP frontend database configuration
+  ansible.builtin.command:
+    cmd: >-
+      ldapsearch -Q -Y EXTERNAL -H ldapi:/// -LLL
+      -b "{{ ldap_config_context_dn }}"
+      olcPasswordHash dn
+  register: ldap_frontend_database_raw
   changed_when: false
-  debugger: on_failed
-
-- name: Debug OpenLDAP frontend database configuration DN
-  ansible.builtin.debug:
-    var: ldap_frontend_database
-
-- name: Assert that exactly one frontend database was detected
-  ansible.builtin.assert:
-    that:
-      - ldap_frontend_database.results | length == 1
-    fail_msg: >-
-      Expected exactly one OpenLDAP frontend database beneath
-      {{ ldap_config_context_dn }}, but found
-      {{ ldap_frontend_database.results | map(attribute='dn') | list }}.
-    success_msg: >-
-      OpenLDAP frontend database DN:
-      {{ ldap_frontend_database.results[0].dn }}
 
 - name: Set OpenLDAP frontend database configuration DN
   ansible.builtin.set_fact:
-    ldap_frontend_db_dn: "{{ ldap_frontend_database.results[0].dn }}"
-  changed_when: false
+    ldap_frontend_db_dn: "{{ ldap_frontend_database_raw.stdout_lines | select('match', '^dn:.*frontend') | first | regex_replace('^dn:\\s*', '') }}"
 
 - name: Configure local crypt(3) as the default password hash scheme
   community.general.ldap_attrs:
