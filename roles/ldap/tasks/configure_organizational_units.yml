@@ -1,17 +1,3 @@
-- name: Create Base DN
-  community.general.ldap_entry:
-    server_uri: ldapi:///
-    sasl_class: external
-    dn: "{{ base_dn }}"
-    objectClass:
-      - dcObject
-      - organization
-    attributes:
-      dc: "{{ ldap_dc_object.dc }}"
-      o: "{{ ldap_dc_object.o }}"
-      description: "{{ ldap_dc_object.description }}"
-    state: present
-
 - name: Create Service Role Organizational Unit (OU) Base DN
   community.general.ldap_entry:
     server_uri: ldapi:///
