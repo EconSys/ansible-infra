@@ -9,7 +9,8 @@
     validate_certs: true
     disable_gpg_check: false
 
-- name: Enable slapd
+- name: Enable and start slapd
   ansible.builtin.systemd_service:
     name: slapd.service
     enabled: true
+    state: started
