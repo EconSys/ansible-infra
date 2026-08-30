@@ -1,0 +1,29 @@
+- name: Create slapd drop-in directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/slapd.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
+
+- name: Install slapd listener URLs hardening override
+  ansible.builtin.copy:
+    src: listeners-hardening.conf
+    dest: /etc/systemd/system/slapd.service.d/60-listeners-hardening.conf
+    owner: root
+    group: root
+    mode: "0644"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
+  notify:
+    - Reload systemd
+    - Restart slapd
+
+# - name: Apply systemd changes
+#   ansible.builtin.meta: flush_handlers

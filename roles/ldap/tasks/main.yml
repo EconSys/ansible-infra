@@ -6,3 +6,6 @@
 
 - name: Validate ldap configurations
   ansible.builtin.import_tasks: validate.yml
+
+- name: Configure listener hardening drop-in
+  ansible.builtin.import_tasks: configure_hardening.yml
