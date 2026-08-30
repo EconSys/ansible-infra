@@ -8,4 +8,4 @@
   ansible.builtin.import_tasks: validate.yml
 
 - name: Configure listener hardening drop-in
-  ansible.builtin.import_tasks: configure_hardening.yml
+  ansible.builtin.import_tasks: configure_listener_hardening.yml
