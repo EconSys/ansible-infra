@@ -9,6 +9,24 @@
     validate_certs: true
     disable_gpg_check: false
 
+- name: Install python-ldap
+  ansible.builtin.command:
+    argv:
+      - "{{ ansible_facts['python'].executable }}"
+      - -m
+      - pip
+      - install
+      - python-ldap
+
+# TODO 
+- name: Verify python-ldap is available to Ansible Python
+  ansible.builtin.command:
+    argv:
+      - "{{ ansible_facts['python'].executable }}"
+      - -c
+      - import ldap
+  changed_when: false
+
 - name: Enable and start slapd
   ansible.builtin.systemd_service:
     name: slapd.service
