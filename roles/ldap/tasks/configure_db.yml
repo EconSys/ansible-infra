@@ -67,7 +67,7 @@
   community.general.ldap_attrs:
     server_uri: ldapi:///
     sasl_class: external
-    dn: "{{ ldap_frontend_db_dn }}"
+    dn: "{{ ldap_config_context_dn }}"
     attributes:
       olcPasswordHash:
         - "{CRYPT}"
