@@ -23,16 +23,7 @@
 
 - name: Set OpenLDAP configuration context DN
   ansible.builtin.set_fact:
-    ldap_config_context_dn: >-
-      {{
-        ldap_config_context.results[0].configContext[0]
-        if (
-          ldap_config_context.results | length > 0
-          and ldap_config_context.results[0].configContext is defined
-          and ldap_config_context.results[0].configContext | length > 0
-        )
-        else 'cn=config'
-      }}
+    ldap_config_context_dn: "{{ ldap_config_context.results[0].configContext[0] }}"
   changed_when: false
 
 - name: Configure Global and Data configuration context
