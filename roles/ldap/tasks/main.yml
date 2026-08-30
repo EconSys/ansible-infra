@@ -1,0 +1,8 @@
+- name: Install ldap packages
+  ansible.builtin.import_tasks: install.yml
+
+- name: Configure ldap
+  ansible.builtin.import_tasks: configure.yml
+
+- name: Validate ldap configurations
+  ansible.builtin.import_tasks: validate.yml

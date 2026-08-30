@@ -1,0 +1,20 @@
+- name: Configure OpenLDAP Database
+  ansible.builtin.import_tasks: configure_db.yml
+
+- name: Import Schemas
+  ansible.builtin.import_tasks: import_schemas.yml
+
+- name: Load Modules
+  ansible.builtin.import_tasks: load_modules.yml
+
+- name: Load OLC Overlays
+  ansible.builtin.import_tasks: configure_overlays.yml
+
+- name: Configure Password Policy
+  ansible.builtin.import_tasks: configure_password_policy.yml
+
+- name: Configure Organizational Units (OU)
+  ansible.builtin.import_tasks: configure_organizational_units.yml
+
+- name: Configure Members
+  ansible.builtin.import_tasks: configure_members.yml

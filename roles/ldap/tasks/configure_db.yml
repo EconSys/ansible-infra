@@ -1,0 +1,168 @@
+# `dn: ""` plus `scope: base` corresponds to `-s base -b ""`
+# `sasl_class: external` corresponds to `-Y EXTERNAL`
+# `scope:` for searches
+#   - base (default)
+#   - children - equivalent to a “subtree” scope
+#   - onelevel - avoids recursively searching configuration subtrees
+#   - subordinate - requires the LDAPv3 subordinate feature extension
+
+- name: Query the OpenLDAP configuration context from the root DSE
+  community.general.ldap_search:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: ""
+    scope: base
+    filter: "(objectClass=*)"
+    attrs:
+      - configContext
+  register: ldap_config_context
+  changed_when: false
+
+- name: Assert that a configuration context was returned
+  ansible.builtin.assert:
+    that:
+      - ldap_config_context.results | length > 0
+      - ldap_config_context.results[0].configContext is defined
+      - ldap_config_context.results[0].configContext | length > 0
+    fail_msg: >-
+      Failed to detect the OpenLDAP configContext from the root DSE via ldapi:///.
+      Results: {{ ldap_config_context.results }}
+    success_msg: >-
+      OpenLDAP configuration context: {{ ldap_config_context.results[0].configContext }}
+
+- name: Set OpenLDAP configuration context DN
+  ansible.builtin.set_fact:
+    ldap_config_context_dn: "{{ ldap_config_context.results[0].configContext[0] }}"
+  changed_when: false
+
+- name: Configure Global and Data configuration context
+  community.general.ldap_attrs:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "{{ ldap_config_context_dn }}"
+    attributes:
+      olcAllows: "{{ ldap_olc.allows }}"
+      olcDisallows: "{{ ldap_olc.disallows }}"
+      olcLogLevel: "{{ ldap_olc.log_levels }}"
+      olcPasswordCryptSaltFormat: "{{ ldap_olc.password_crypt_salt_format }}"
+    state: exact
+
+- name: Find OpenLDAP database configuration DN
+  community.general.ldap_search:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "{{ ldap_config_context_dn }}"
+    scope: onelevel
+    filter: "(olcSuffix=*)"
+    attrs: []
+  register: ldap_database_dn
+  changed_when: false
+
+- name: Assert that OpenLDAP database DN was detected
+  ansible.builtin.assert:
+    that:
+      - ldap_database_dn.results | length > 0
+    fail_msg: >-
+      Failed to detect an OpenLDAP database DN with an olcSuffix under
+      {{ ldap_config_context_dn }}.
+    success_msg: >-
+      OpenLDAP DB DN: {{ ldap_database_dn.results[0].dn }}
+
+- name: Set OpenLDAP database configuration DN
+  ansible.builtin.set_fact:
+    ldap_db_dn: "{{ ldap_database_dn.results[0].dn }}"
+  changed_when: false
+
+- name: Configure database root DN
+  community.general.ldap_attrs:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "{{ ldap_db_dn }}"
+    attributes:
+      olcSuffix: "{{ base_dn }}"
+    state: exact
+
+- name: Configure database indexes
+  community.general.ldap_attrs:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "{{ ldap_db_dn }}"
+    attributes:
+      olcDbIndex: "{{ ldap_database_indexes }}"
+    state: exact
+
+- name: Configure ordered OpenLDAP database ACLs
+  community.general.ldap_attrs:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "{{ ldap_db_dn }}"
+    attributes:
+      olcAccess: "{{ ldap_olc_access | map(attribute='value') | list }}"
+    ordered: true
+    state: exact
+
+- name: Find OpenLDAP frontend database configuration DN
+  community.general.ldap_search:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "{{ ldap_config_context_dn }}"
+    scope: onelevel
+    filter: "(&(objectClass=olcFrontendConfig)(olcDatabase=frontend))"
+    attrs:
+      - olcDatabase
+      - olcPasswordHash
+  register: ldap_frontend_database
+  changed_when: false
+
+- name: Assert that exactly one frontend database was detected
+  ansible.builtin.assert:
+    that:
+      - ldap_frontend_database.results | length == 1
+    fail_msg: >-
+      Expected exactly one OpenLDAP frontend database beneath
+      {{ ldap_config_context_dn }}, but found
+      {{ ldap_frontend_database.results | map(attribute='dn') | list }}.
+    success_msg: >-
+      OpenLDAP frontend database DN:
+      {{ ldap_frontend_database.results[0].dn }}
+
+- name: Set OpenLDAP frontend database configuration DN
+  ansible.builtin.set_fact:
+    ldap_frontend_db_dn: "{{ ldap_frontend_database.results[0].dn }}"
+  changed_when: false
+
+- name: Configure local crypt(3) as the default password hash scheme
+  community.general.ldap_attrs:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "{{ ldap_frontend_db_dn }}"
+    attributes:
+      olcPasswordHash:
+        - "{CRYPT}"
+    state: exact
+
+- name: Generate salted SHA-512 crypt password hash
+  ansible.builtin.command:
+    argv:
+      - slappasswd
+      - -h
+      - "{CRYPT}"
+      - -c
+      - "{{ ldap_olc.password_crypt_salt_format }}"
+  args:
+    stdin: "{{ vault_ldap_bind_pw }}"
+    stdin_add_newline: false
+  register: ldap_salted_password
+  changed_when: false
+  no_log: true
+
+- name: Initialize root DN and password for directory bootstrapping
+  community.general.ldap_attrs:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "{{ ldap_db_dn }}"
+    attributes:
+      olcRootDN: "{{ bind_dn }}"
+      olcRootPW: "{{ ldap_salted_password.stdout }}"
+    state: exact
+  no_log: true

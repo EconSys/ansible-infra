@@ -1,0 +1,11 @@
+- name: Load OpenLDAP OLC modules
+  community.general.ldap_entry:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "cn=module,{{ ldap_config_context_dn }}"
+    objectClass:
+      - olcModuleList
+    attributes:
+      cn: module
+      olcModulePath: /usr/lib64/openldap/
+      olcModuleLoad: "{{ ldap_modules }}"

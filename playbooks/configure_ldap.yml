@@ -1,0 +1,7 @@
+---
+- name: Configure Lightweight Directory Access Protocol (LDAP)
+  hosts: local_host
+  become: true
+
+  roles:
+    - role: ldap

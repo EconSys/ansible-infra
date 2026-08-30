@@ -1,0 +1,99 @@
+ldap_server_uri: "ldap://127.0.0.1:389"
+
+ldap_shadow_inactive: 30
+ldap_shadow_max: 60
+ldap_shadow_min: 7
+ldap_shadow_warning: 14
+
+ldap_olc:
+  # disable ldapv2
+  allows: []
+  # disable anonymous binds
+  disallows: bind_anon
+  # logs connections, LDAP operations, and results
+  log_levels: stats
+  # use salted SHA-512 via crypt(3)
+  password_crypt_salt_format: '$6$%.16s'
+  # baseline DB search filters
+
+ldap_database_indexes:
+  - objectClass eq
+  - cn,uid eq
+  - employeeNumber eq
+  - uidNumber,gidNumber eq
+  # standard group-lookup
+  - member,memberUid eq
+
+ldap_olc_access:
+  - name: user_password
+    description: >-
+      Protect password verifiers. Users may update but not read their own
+      password, while unauthenticated clients retain auth-only access needed
+      for initial password-based LDAP binds.
+    value: >-
+      to attrs=userPassword
+      by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage
+      by self =xw
+      by anonymous auth
+      by * none
+  - name: password_aging
+    description: >-
+      Protect password-aging metadata while permitting the LDAP-PAM lookup
+      account to read it when the deployed PAM/NSS client requires expiry
+      evaluation.
+    value: >-
+      to attrs=shadowLastChange
+      by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage
+      by dn="cn=ldap-bind,{{ service_dn }}" read
+      by self read
+      by * none
+  - name: general_directory
+    description: >-
+      Default access for all remaining attributes: local root administers,
+      the LDAP-PAM lookup account reads required directory data, users read
+      their own data, authenticated identities can search, and anonymous
+      clients retain auth-only access.
+    value: >-
+      to *
+      by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage
+      by dn="cn=ldap-bind,{{ service_dn }}" read
+      by self read
+      by users search
+      by anonymous auth
+      by * none
+
+ldap_modules:
+  - memberof.la
+  - refint.la
+  - ppolicy.la
+
+ldap_overlays:
+  - ppolicy
+  - memberof
+  - refint
+
+ldap_schemas:
+  - core
+  - cosine
+  - inetorgperson
+  - nis
+  - openssh-lpk
+  - ppolicy
+
+ldap_ppolicy_attrs:
+  pwdAttribute: userPassword
+  pwdCheckQuality: "2"
+  pwdCheckModule: check_password.so
+  pwdMinAge: "86400"
+  pwdMaxAge: "5184000"
+  pwdMinLength: "15"
+  pwdInHistory: "24"
+  pwdMaxFailure: "3"
+  pwdExpireWarning: "604800"
+  pwdFailureCountInterval: "0"
+  pwdLockout: "TRUE"
+  pwdLockoutDuration: "1800"
+  pwdAllowUserChange: "TRUE"
+  pwdGraceAuthnLimit: "0"
+  pwdMustChange: "TRUE"
+  pwdSafeModify: "FALSE"

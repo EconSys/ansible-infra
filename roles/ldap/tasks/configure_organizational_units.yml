@@ -1,0 +1,196 @@
+- name: Create Base DN
+  community.general.ldap_entry:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "{{ base_dn }}"
+    objectClass:
+      - dcObject
+      - organization
+    attributes:
+      dc: "{{ ldap_dc_object.dc }}"
+      o: "{{ ldap_dc_object.o }}"
+      description: "{{ ldap_dc_object.description }}"
+    state: present
+
+- name: Create Service Role Organizational Unit (OU) Base DN
+  community.general.ldap_entry:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "{{ service_dn }}"
+    objectClass:
+      - organizationalUnit
+    attributes:
+      ou: Service-Accounts
+    state: present
+
+- name: Generate salted SHA-512 crypt password hash
+  ansible.builtin.command:
+    argv:
+      - /usr/sbin/slappasswd
+      - -h
+      - "{CRYPT}"
+      - -c
+      - "{{ ldap_olc.password_crypt_salt_format }}"
+  args:
+    stdin: "{{ vault_service_account_password }}"
+    stdin_add_newline: false
+  register: ldap_service_account_salted_password
+  changed_when: false
+  no_log: true
+
+- name: Create Service accounts entry
+  community.general.ldap_entry:
+    dn: "cn={{ service.name }},{{ service_dn }}"
+    objectClass:
+      - organizationalRole
+      - simpleSecurityObject
+    attributes:
+      cn: "{{ service.name }}"
+      description: "{{ service.description }}"
+      userPassword: "{{ ldap_service_account_salted_password.stdout }}"
+    server_uri: "{{ ldap_server_uri }}"
+    bind_dn: "{{ bind_dn }}"
+    bind_pw: "{{ vault_ldap_bind_pw }}"
+    state: present
+  loop: "{{ ldap_service_accounts }}"
+  loop_control:
+    loop_var: service
+    label: "{{ service.name }}"
+  no_log: true
+
+- name: Create Group Organizational Unit (OU) Base DN
+  community.general.ldap_entry:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "{{ group_dn }}"
+    objectClass:
+      - organizationalUnit
+    attributes:
+      ou: Groups
+    state: present
+
+- name: Create Role-based Groups entry
+  community.general.ldap_entry:
+    dn: "cn={{ group.cn }},{{ group_dn }}"
+    objectClass:
+      - groupOfNames
+    attributes:
+      cn: "{{ group.cn }}"
+      description: "{{ group.description }}"
+    server_uri: "{{ ldap_server_uri }}"
+    bind_dn: "{{ bind_dn }}"
+    bind_pw: "{{ vault_ldap_bind_pw }}"
+    state: present
+  loop: "{{ ldap_groups }}"
+  loop_control:
+    loop_var: group
+    label: "{{ group.cn }}"
+  no_log: true
+
+- name: Create Unix Organizational Unit (OU) Base DN
+  community.general.ldap_entry:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "{{ unix_dn }}"
+    objectClass:
+      - organizationalUnit
+    attributes:
+      ou: UnixGroups
+    state: present
+
+- name: Create UNIX Groups entry
+  community.general.ldap_entry:
+    dn: "cn={{ group.cn }},{{ unix_dn }}"
+    objectClass:
+      - posixGroup
+    attributes:
+      cn: "{{ group.cn }}"
+      description: "{{ group.description }}"
+      gidNumber: "{{ group.gid_number }}"
+    server_uri: "{{ ldap_server_uri }}"
+    bind_dn: "{{ bind_dn }}"
+    bind_pw: "{{ vault_ldap_bind_pw }}"
+    state: present
+  loop: "{{ ldap_groups_unix }}"
+  loop_control:
+    loop_var: group
+    label: "{{ group.cn }}"
+  no_log: true
+
+- name: Create Users Organizational Unit (OU) Base DN
+  community.general.ldap_entry:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "{{ users_dn }}"
+    objectClass:
+      - organizationalUnit
+    attributes:
+      ou: Users
+    state: present
+
+- name: Generate salted SHA-512 crypt password hash
+  ansible.builtin.command:
+    argv:
+      - /usr/sbin/slappasswd
+      - -h
+      - "{CRYPT}"
+      - -c
+      - "{{ ldap_olc.password_crypt_salt_format }}"
+  args:
+    stdin: "{{ vault_ldap_default_pw }}"
+    stdin_add_newline: false
+  register: ldap_default_salted_password
+  changed_when: false
+  no_log: true
+
+- name: Create Users Posix Account entries
+  community.general.ldap_entry:
+    dn: "uid={{ user.cn }},{{ users_dn }}"
+    objectClass:
+      - inetOrgPerson
+      - posixAccount
+      - shadowAccount
+    attributes:
+      cn: "{{ user.cn }}"
+      sn: "{{ user.cn }}"
+      uid: "{{ user.cn }}"
+      uidNumber: "{{ user.uid }}"
+      gidNumber: "{{ user.uid }}"
+      homeDirectory: "/home/{{ user.cn }}"
+      loginShell: "/bin/bash"
+      userPassword: "{{ ldap_default_salted_password.stdout }}"
+      shadowLastChange: $(( $(date +%s) / 86400))
+      departmentNumber: $(( $(date -d "+90 days" +%s) / 86400))
+      shadowInactive: "{{ ldap_shadow_inactive }}"
+      shadowMax: "{{ ldap_shadow_max }}"
+      shadowMin: "{{ ldap_shadow_min }}"
+      shadowWarning: "{{ ldap_shadow_warning }}"
+    server_uri: "{{ ldap_server_uri }}"
+    bind_dn: "{{ bind_dn }}"
+    bind_pw: "{{ vault_ldap_bind_pw }}"
+    state: present
+  loop: "{{ ldap_users }}"
+  loop_control:
+    loop_var: user
+    label: "{{ user.cn }}"
+  no_log: true
+
+- name: Create Users Posix Group entries
+  community.general.ldap_entry:
+    dn: "cn={{ user.cn }},{{ unix_dn }}"
+    objectClass:
+      - posixGroup
+    attributes:
+      cn: "{{ user.cn }}"
+      description: "{{ user.cn }} User Group"
+      gidNumber: "{{ user.uid }}"
+      memberUid: "{{ user.cn }}"
+    server_uri: "{{ ldap_server_uri }}"
+    bind_dn: "{{ bind_dn }}"
+    bind_pw: "{{ vault_ldap_bind_pw }}"
+    state: present
+  loop: "{{ ldap_users }}"
+  loop_control:
+    loop_var: user
+    label: "{{ user.cn }}"
+  no_log: true

@@ -1,0 +1,48 @@
+- name: Configure memberOf overlay for RBAC groups (groupOfNames)
+  community.general.ldap_entry:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "olcOverlay=memberof,{{ ldap_db_dn }}"
+    objectClass:
+      - olcConfig
+      - olcOverlayConfig
+      - olcMemberOf
+    attributes:
+      olcOverlay: memberof
+      olcMemberOfRefInt: "TRUE"
+      olcMemberOfDangling: ignore
+      olcMemberOfGroupOC: groupOfNames
+      olcMemberOfMemberAD: member
+      olcMemberOfMemberOfAD: memberOf
+
+- name: Create OLC PPolicy overlay
+  community.general.ldap_entry:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "olcOverlay=ppolicy,{{ ldap_db_dn }}"
+    objectClass:
+      - olcOverlayConfig
+      - olcPPolicyConfig
+    attributes:
+      olcOverlay: ppolicy
+      olcPPolicyDefault: "cn=passwordDefault,{{ policies_dn }}"
+      olcPPolicyHashCleartext: "TRUE"
+      olcPPolicyUseLockout: "FALSE"
+      olcPPolicyForwardUpdates: "FALSE"
+
+- name: Configure refint overlay for referential integrity
+  community.general.ldap_entry:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "olcOverlay=refint,{{ ldap_db_dn }}"
+    objectClass:
+      - olcConfig
+      - olcOverlayConfig
+      - olcRefintConfig
+    attributes:
+      olcOverlay: refint
+      olcRefintAttribute:
+        - manager
+        - member
+        - memberOf
+        - owner

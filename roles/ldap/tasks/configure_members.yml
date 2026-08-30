@@ -1,0 +1,47 @@
+- name: Validate requested LDAP build environment
+  ansible.builtin.assert:
+    that:
+      - build_env is defined
+      - build_env in ['stage', 'prod']
+    fail_msg: >-
+      build_env must be either 'stage' or 'prod'; received '{{ build_env | default('UNDEFINED') }}'.
+      build_env is passed via `ansible-playbook -e "build_env=${ENVIRONMENT}"`,
+      where ENVIRONMENT is set by the Packer shell provisioner's environment_vars
+      (ENVIRONMENT=${var.environment}) in the .pkr.hcl config, ultimately sourced
+      from Packer's `environment` variable at build invocation.
+      Check that `var.environment` is set correctly for this Packer build
+      (e.g. -var environment=stage/prod or your .pkrvars.hcl file).
+
+- name: Add members to UNIX Groups for build environment {{ build_env }}
+  community.general.ldap_attrs:
+    dn: "cn={{ ldap_unix_group.cn }},{{ unix_dn }}"
+    attributes:
+      memberUid: "{{ ldap_member }}"
+    server_uri: "{{ ldap_server_uri }}"
+    bind_dn: "{{ bind_dn }}"
+    bind_pw: "{{ vault_ldap_bind_pw }}"
+    state: present
+  loop: "{{ ldap_users_unix | ansible.builtin.subelements(build_env) }}"
+  loop_control:
+    label: "{{ ldap_unix_group.cn }}: {{ ldap_member }}"
+  vars:
+    ldap_unix_group: "{{ item.0 }}"
+    ldap_member: "{{ item.1 }}"
+  no_log: true
+
+- name: Add members to Role-based Groups for build environment {{ build_env }}
+  community.general.ldap_attrs:
+    dn: "cn={{ ldap_role.cn }},{{ group_dn }}"
+    attributes:
+      member: "uid={{ ldap_member }},{{ users_dn }}"
+    server_uri: "{{ ldap_server_uri }}"
+    bind_dn: "{{ bind_dn }}"
+    bind_pw: "{{ vault_ldap_bind_pw }}"
+    state: present
+  loop: "{{ ldap_users_roles | ansible.builtin.subelements(build_env) }}"
+  loop_control:
+    label: "{{ ldap_role.cn }}: {{ ldap_member }}"
+  vars:
+    ldap_role: "{{ item.0 }}"
+    ldap_member: "{{ item.1 }}"
+  no_log: true

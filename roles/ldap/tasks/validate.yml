@@ -1,0 +1,111 @@
+- name: Validate slapd systemd unit definition
+  ansible.builtin.command:
+    argv:
+      - systemd-analyze
+      - verify
+      - slapd.service
+  changed_when: false
+
+- name: Validate OpenLDAP configuration context syntax
+  ansible.builtin.command:
+    argv:
+      - /sbin/slaptest
+      - -u
+  changed_when: false
+
+- name: Validate OpenLDAP modules
+  community.general.ldap_search:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "{{ ldap_config_context_dn }}"
+    scope: onelevel
+    filter: "(objectClass=olcModuleList)"
+    attrs:
+      - olcModuleLoad
+  register: ldap_module_validation
+  changed_when: false
+
+- name: Assert that OpenLDAP module configuration exists
+  ansible.builtin.assert:
+    that:
+      - ldap_module_validation.results | length == 1
+    fail_msg: >-
+      OpenLDAP module configuration was not found under
+      {{ ldap_config_context_dn }}.
+
+- name: Validate OpenLDAP overlays
+  community.general.ldap_search:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "{{ ldap_db_dn }}"
+    scope: onelevel
+    filter: "(objectClass=olcOverlayConfig)"
+    attrs:
+      - olcOverlay
+  register: ldap_overlay_validation
+  changed_when: false
+
+- name: Assert that required OpenLDAP overlays are configured
+  ansible.builtin.assert:
+    that:
+      - item in (
+          ldap_overlay_validation.results
+          | map(attribute='olcOverlay')
+          | flatten
+          | map('regex_replace', '^\{\d+\}', '')
+          | list
+        )
+    fail_msg: >-
+      Required OpenLDAP overlay {{ item }} is not configured on
+      {{ ldap_db_dn }}.
+  loop: "{{ ldap_overlays }}"
+
+- name: Validate LDAP bind
+  ansible.builtin.command:
+    argv:
+      - ldapwhoami
+      - -x
+      - -w
+      - "{{ vault_ldap_bind_pw }}"
+      - -D
+      - "{{ bind_dn }}"
+      - -H
+      - "{{ ldap_server_uri }}"
+  register: ldap_bind_validation
+  changed_when: false
+  no_log: true
+
+- name: Assert LDAP bind identity
+  ansible.builtin.assert:
+    that:
+      - ldap_bind_validation.stdout | trim == "dn:{{ bind_dn }}"
+    fail_msg: "LDAP bind succeeded but returned an unexpected identity."
+  no_log: true
+
+- name: Validate Password Policy
+  community.general.ldap_search:
+    dn: "{{ policies_dn }}"
+    scope: onelevel
+    filter: "(&(cn=passwordDefault)(objectClass=pwdPolicy))"
+    attrs: "{{ ldap_ppolicy_attrs.keys() | list }}"
+    server_uri: "{{ ldap_server_uri }}"
+    bind_dn: "{{ bind_dn }}"
+    bind_pw: "{{ vault_ldap_bind_pw }}"
+  register: ldap_password_policy
+  changed_when: false
+  no_log: true
+
+- name: Assert Password Policy
+  ansible.builtin.assert:
+    that:
+      - ldap_password_policy.results | length == 1
+      - ldap_password_policy.results[0].dn == "cn=passwordDefault,{{ policies_dn }}"
+      - item.key in ldap_password_policy.results[0]
+      - ldap_password_policy.results[0][item.key] == [item.value | string]
+    fail_msg: >-
+      Password policy attribute {{ item.key }} expected {{ item.value }}
+      but got {{ ldap_password_policy.results[0][item.key] | default('undefined') }}.
+  loop: "{{ ldap_ppolicy_attrs | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  no_log: true

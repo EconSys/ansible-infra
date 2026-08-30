@@ -1,0 +1,59 @@
+- name: Install OpenSSH OpenLDAP public-key schema
+  ansible.builtin.template:
+    src: openssh-lpk.ldif.j2
+    dest: /etc/openldap/schema/openssh-lpk.ldif
+    owner: root
+    group: root
+    mode: "0644"
+    seuser: _default
+    serole: _default
+    setype: _default
+    selevel: _default
+
+- name: Check whether each OpenLDAP schema is loaded
+  community.general.ldap_search:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "cn=schema,{{ ldap_config_context_dn }}"
+    scope: onelevel
+    filter: "(cn=*{{ schema }}*)"
+    attrs:
+      - cn
+  loop: "{{ ldap_schemas }}"
+  loop_control:
+    loop_var: schema
+    label: "{{ schema }}"
+  register: ldap_schema_searches
+  changed_when: false
+
+- name: Assert that each OpenLDAP schema search succeeded
+  ansible.builtin.assert:
+    that:
+      - not (schema_search.failed | default(false))
+    fail_msg: >-
+      Failed to determine whether OpenLDAP schema {{ schema_search.schema }}
+      is already loaded.
+  loop: "{{ ldap_schema_searches.results }}"
+  loop_control:
+    loop_var: schema_search
+    label: "{{ schema_search.schema }}"
+
+- name: Add OpenLDAP schemas not pre-loaded
+  ansible.builtin.command:
+    argv:
+      - ldapadd
+      - -Q
+      - -Y
+      - EXTERNAL
+      - -H
+      - ldapi:///
+      - -f
+      - "/etc/openldap/schema/{{ schema_search.schema }}.ldif"
+  loop: "{{ ldap_schema_searches.results }}"
+  loop_control:
+    loop_var: schema_search
+    label: "{{ schema_search.schema }}"
+  when:
+    - schema_search.results | length == 0
+  register: ldap_schema_imports
+  changed_when: true
