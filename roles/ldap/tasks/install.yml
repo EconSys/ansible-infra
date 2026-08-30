@@ -9,22 +9,18 @@
     validate_certs: true
     disable_gpg_check: false
 
-- name: Install python-ldap
-  ansible.builtin.command:
-    argv:
-      - "{{ ansible_facts['python'].executable }}"
-      - -m
-      - pip
-      - install
-      - python-ldap
+- name: Install LDAP Python library
+  ansible.builtin.dnf:
+    name:
+      - python3-ldap
+    state: present
 
-# TODO 
 - name: Verify python-ldap is available to Ansible Python
   ansible.builtin.command:
     argv:
       - "{{ ansible_facts['python'].executable }}"
       - -c
-      - import ldap
+      - 'import ldap; print(ldap.__version__)'
   changed_when: false
 
 - name: Enable and start slapd
