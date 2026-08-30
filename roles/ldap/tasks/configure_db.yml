@@ -41,11 +41,6 @@
   ansible.builtin.set_fact:
     ldap_db_dn: "{{ ldap_database_dn_raw.stdout_lines | select('match', '^dn:') | first | regex_replace('^dn:\\s*', '') }}"
 
-- name: Set OpenLDAP database configuration DN
-  ansible.builtin.set_fact:
-    ldap_db_dn: "{{ ldap_database_dn.results[0].dn }}"
-  changed_when: false
-
 - name: Configure database root DN
   community.general.ldap_attrs:
     server_uri: ldapi:///
@@ -86,9 +81,8 @@
       - "{CRYPT}"
       - -c
       - "{{ ldap_olc.password_crypt_salt_format }}"
-  args:
-    stdin: "{{ vault_ldap_bind_pw }}"
-    stdin_add_newline: false
+      - -s
+      - "{{ vault_ldap_bind_pw }}"
   register: ldap_salted_password
   changed_when: false
   no_log: true
