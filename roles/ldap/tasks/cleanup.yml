@@ -1,0 +1,7 @@
+- name: Uninstall development packages
+  ansible.builtin.dnf:
+    name:
+      - gcc
+      - "python{{ ansible_facts['python'].version.major }}.{{ ansible_facts['python'].version.minor }}-devel"
+      - openldap-devel
+    state: absent

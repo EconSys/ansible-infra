@@ -1,11 +1,14 @@
-- name: Install ldap packages
+- name: Install OpenLDAP packages
   ansible.builtin.import_tasks: install.yml
 
-- name: Configure ldap
+- name: Configure OpenLDAP
   ansible.builtin.import_tasks: configure.yml
 
-- name: Validate ldap configurations
+- name: Validate OpenLDAP configurations
   ansible.builtin.import_tasks: validate.yml
 
-- name: Configure listener hardening drop-in
+- name: Configure OpenLDAP listener hardening drop-in
   ansible.builtin.import_tasks: configure_listener_hardening.yml
+
+- name: Cleanup OpenLDAP development tools
+  ansible.builtin.import_tasks: cleanup.yml
