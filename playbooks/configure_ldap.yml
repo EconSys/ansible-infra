@@ -2,6 +2,7 @@
 - name: Configure Lightweight Directory Access Protocol (LDAP)
   hosts: local_host
   become: true
+  strategy: debug
 
   roles:
     - role: ldap
