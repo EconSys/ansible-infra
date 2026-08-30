@@ -16,6 +16,7 @@
       - configContext
   register: ldap_config_context
   changed_when: false
+  debugger: on_failed
 
 - name: Debug OpenLDAP configuration context result
   ansible.builtin.debug:
@@ -49,6 +50,7 @@
       - dn
   register: ldap_database_dn
   changed_when: false
+  debugger: on_failed
 
 - name: Debug OpenLDAP database configuration DN
   ansible.builtin.debug:
@@ -109,6 +111,7 @@
       - olcPasswordHash
   register: ldap_frontend_database
   changed_when: false
+  debugger: on_failed
 
 - name: Debug OpenLDAP frontend database configuration DN
   var: ldap_frontend_database
