@@ -1,4 +1,4 @@
-- name: Configure OpenLDAP Database
+- name: Configure OpenLDAP Database base configurations
   ansible.builtin.import_tasks: configure_db.yml
 
 - name: Import Schemas
@@ -9,6 +9,9 @@
 
 - name: Load OLC Overlays
   ansible.builtin.import_tasks: configure_overlays.yml
+
+- name: Configure OpenLDAP Database ACLs and indexes
+  ansible.builtin.import_tasks: configure_db_acls_indexes.yml
 
 - name: Configure Password Policy
   ansible.builtin.import_tasks: configure_password_policy.yml

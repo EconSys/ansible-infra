@@ -1,0 +1,18 @@
+- name: Configure database indexes
+  community.general.ldap_attrs:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "{{ ldap_db_dn }}"
+    attributes:
+      olcDbIndex: "{{ ldap_database_indexes }}"
+    state: exact
+
+- name: Configure ordered OpenLDAP database ACLs
+  community.general.ldap_attrs:
+    server_uri: ldapi:///
+    sasl_class: external
+    dn: "{{ ldap_db_dn }}"
+    attributes:
+      olcAccess: "{{ ldap_olc_access | map(attribute='value') | list }}"
+    ordered: true
+    state: exact
