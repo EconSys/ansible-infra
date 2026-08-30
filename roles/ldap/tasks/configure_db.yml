@@ -12,11 +12,15 @@
     sasl_class: external
     dn: ""
     scope: base
-    filter: "(objectClass=*)"
     attrs:
       - configContext
   register: ldap_config_context
   changed_when: false
+  ignore_errors: true
+
+- name: Debug OpenLDAP configuration context result
+  ansible.builtin.debug:
+    var: ldap_config_context
 
 - name: Assert that a configuration context was returned
   ansible.builtin.assert:
@@ -29,6 +33,7 @@
       Results: {{ ldap_config_context.results }}
     success_msg: >-
       OpenLDAP configuration context: {{ ldap_config_context.results[0].configContext }}
+  ignore_errors: true
 
 - name: Set OpenLDAP configuration context DN
   ansible.builtin.set_fact:
@@ -46,6 +51,7 @@
       olcLogLevel: "{{ ldap_olc.log_levels }}"
       olcPasswordCryptSaltFormat: "{{ ldap_olc.password_crypt_salt_format }}"
     state: exact
+  ignore_errors: true
 
 - name: Find OpenLDAP database configuration DN
   community.general.ldap_search:
@@ -54,9 +60,15 @@
     dn: "{{ ldap_config_context_dn }}"
     scope: onelevel
     filter: "(olcSuffix=*)"
-    attrs: []
+    attrs:
+      - dn
   register: ldap_database_dn
   changed_when: false
+  ignore_errors: true
+
+- name: Debug OpenLDAP database configuration DN
+  ansible.builtin.debug:
+    var: ldap_database_dn
 
 - name: Assert that OpenLDAP database DN was detected
   ansible.builtin.assert:
@@ -67,6 +79,7 @@
       {{ ldap_config_context_dn }}.
     success_msg: >-
       OpenLDAP DB DN: {{ ldap_database_dn.results[0].dn }}
+  ignore_errors: true
 
 - name: Set OpenLDAP database configuration DN
   ansible.builtin.set_fact:
@@ -113,6 +126,10 @@
       - olcPasswordHash
   register: ldap_frontend_database
   changed_when: false
+  ignore_errors: true
+
+- name: Debug OpenLDAP frontend database configuration DN
+  var: ldap_frontend_database
 
 - name: Assert that exactly one frontend database was detected
   ansible.builtin.assert:
@@ -125,6 +142,7 @@
     success_msg: >-
       OpenLDAP frontend database DN:
       {{ ldap_frontend_database.results[0].dn }}
+  ignore_errors: true
 
 - name: Set OpenLDAP frontend database configuration DN
   ansible.builtin.set_fact:
