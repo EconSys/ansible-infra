@@ -22,22 +22,18 @@
   ansible.builtin.debug:
     var: ldap_config_context
 
-- name: Assert that a configuration context was returned
-  ansible.builtin.assert:
-    that:
-      - ldap_config_context.results | length > 0
-      - ldap_config_context.results[0].configContext is defined
-      - ldap_config_context.results[0].configContext | length > 0
-    fail_msg: >-
-      Failed to detect the OpenLDAP configContext from the root DSE via ldapi:///.
-      Results: {{ ldap_config_context.results }}
-    success_msg: >-
-      OpenLDAP configuration context: {{ ldap_config_context.results[0].configContext }}
-  ignore_errors: true
-
 - name: Set OpenLDAP configuration context DN
   ansible.builtin.set_fact:
-    ldap_config_context_dn: "{{ ldap_config_context.results[0].configContext[0] }}"
+    ldap_config_context_dn: >-
+      {{
+        ldap_config_context.results[0].configContext[0]
+        if (
+          ldap_config_context.results | length > 0
+          and ldap_config_context.results[0].configContext is defined
+          and ldap_config_context.results[0].configContext | length > 0
+        )
+        else 'cn=config'
+      }}
   changed_when: false
 
 - name: Configure Global and Data configuration context
