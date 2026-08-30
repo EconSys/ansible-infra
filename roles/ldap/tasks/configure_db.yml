@@ -114,7 +114,8 @@
   debugger: on_failed
 
 - name: Debug OpenLDAP frontend database configuration DN
-  var: ldap_frontend_database
+  ansible.builtin.debug:
+    var: ldap_frontend_database
 
 - name: Assert that exactly one frontend database was detected
   ansible.builtin.assert:

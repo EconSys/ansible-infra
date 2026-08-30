@@ -13,7 +13,7 @@
   ansible.builtin.dnf:
     name:
       - gcc
-      -  "python{{ ansible_facts['python'].version.major }}.{{ ansible_facts['python'].version.minor }}-devel"
+      - "python{{ ansible_facts['python'].version.major }}.{{ ansible_facts['python'].version.minor }}-devel"
       - openldap-devel
     state: present
 
@@ -25,6 +25,7 @@
       - pip
       - install
       - python-ldap
+  changed_when: false
 
 - name: Verify python-ldap is available to Ansible Python
   ansible.builtin.command:
