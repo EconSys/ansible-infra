@@ -16,7 +16,6 @@
       - configContext
   register: ldap_config_context
   changed_when: false
-  ignore_errors: true
 
 - name: Debug OpenLDAP configuration context result
   ansible.builtin.debug:
@@ -47,7 +46,6 @@
       olcLogLevel: "{{ ldap_olc.log_levels }}"
       olcPasswordCryptSaltFormat: "{{ ldap_olc.password_crypt_salt_format }}"
     state: exact
-  ignore_errors: true
 
 - name: Find OpenLDAP database configuration DN
   community.general.ldap_search:
@@ -60,7 +58,6 @@
       - dn
   register: ldap_database_dn
   changed_when: false
-  ignore_errors: true
 
 - name: Debug OpenLDAP database configuration DN
   ansible.builtin.debug:
@@ -75,7 +72,6 @@
       {{ ldap_config_context_dn }}.
     success_msg: >-
       OpenLDAP DB DN: {{ ldap_database_dn.results[0].dn }}
-  ignore_errors: true
 
 - name: Set OpenLDAP database configuration DN
   ansible.builtin.set_fact:
@@ -122,7 +118,6 @@
       - olcPasswordHash
   register: ldap_frontend_database
   changed_when: false
-  ignore_errors: true
 
 - name: Debug OpenLDAP frontend database configuration DN
   var: ldap_frontend_database
@@ -138,7 +133,6 @@
     success_msg: >-
       OpenLDAP frontend database DN:
       {{ ldap_frontend_database.results[0].dn }}
-  ignore_errors: true
 
 - name: Set OpenLDAP frontend database configuration DN
   ansible.builtin.set_fact:
